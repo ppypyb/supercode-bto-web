@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supercode.bto.web.mapper.BtoWebMapper">
+
+    <select id="queryRegistrationCode" parameterType="java.lang.String" resultType="java.util.Map">
+        select * from sj_xtb t where 1 = 1
+         <if test="registrationCode != null and registrationCode != ''">
+             AND t.xt_zcm = #{registrationCode}
+         </if>
+    </select>
+    <select id="queryOrderList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT DISTINCT
+                scddb.dd_dddh AS ddbh,
+                cp.cp_cpbh AS cpbh,
+                cp.cp_mc AS cpmc,
+                cp.cp_th AS cpth,
+                cp.cp_cz AS cpcz,
+                cp.cp_dhdd AS cptp,
+                cp.kh_bh AS khbh,
+                scddb.ht_bh AS htbh,
+                CONVERT ( VARCHAR ( 100 ), scddb.dd_jhrq, 23 ) AS jhrq,
+                CONVERT ( VARCHAR ( 100 ), scddb.dd_wcrq, 20 ) AS wcrq,
+                scddb.pc_pcsl AS pcsl,
+                scddb.dd_wcsl AS wcsl,
+                cp.cp_dhdd AS dhdd,
+                CONVERT ( VARCHAR ( 100 ), scddb.pc_zdrq, 20 ) AS zdrq,
+                scddb.dd_zt AS ddzt
+                FROM
+                yw_cpxxb cp,
+                ( SELECT DISTINCT ddb.* FROM sc_scddb ddb LEFT JOIN sc_jldjb djb ON ddb.dd_dddh = djb.dd_dddh
+                <if test="rybh != null and rybh != ''">
+                    AND djb.ry_bh = #{rybh}
+                </if>
+                    ) scddb
+                WHERE
+                cp.cp_cpbh = scddb.cp_cpbh
+                AND scddb.dd_zt &lt;&gt; '0'
+                AND cp.kh_bh = '1001'
+                AND DATEDIFF( DAY, '2021-03-05', scddb.pc_zdrq ) > 0
+                AND DATEDIFF( DAY, scddb.pc_zdrq, '2022-01-03' ) > 0
+
+            <if test="khbh != null and khbh != ''">
+                AND cp.kh_bh = #{khbh}
+            </if>
+            <if test="htbh != null and htbh != ''">
+                AND scddb.ht_bh = #{htbh}
+            </if>
+            <if test="ddbh != null and ddbh != ''">
+                AND scddb.dd_dddh = #{ddbh}
+            </if>
+            <if test="cpmc != null and cpmc != ''">
+                AND cp.cp_mc LIKE  '%'+#{cpmc}+'%'
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND DATEDIFF( DAY, #{startDate}, scddb.pc_zdrq ) &gt; 0
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND DATEDIFF( DAY, scddb.pc_zdrq, #{endDate} ) &gt; 0
+            </if>
+
+    </select>
+
+    <select id="queryDepartmentOrderList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+        <if test="jhwcsjFiled != null">
+            ${jhwcsjFiled} AS jhwcsj,
+        </if>
+        <if test="scwcsjFiled != null">
+            ${scwcsjFiled} AS scwcsj,
+        </if>
+        <if test="scjjslFiled != null">
+            ${scjjslFiled} AS scjjsl,
+        </if>
+        <if test="scwcslFiled != null">
+            ${scwcslFiled} AS scwcsl,
+        </if>
+        <if test="scfpslFiled != null">
+            ${scfpslFiled} AS scfpsl,
+        </if>
+        dd.dd_dddh AS dddh
+        FROM
+        sc_scddb dd
+        WHERE
+             1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND dd.dd_dddh = #{ddbh}
+        </if>
+
+
+    </select>
+
+    <select id="queryProcessDetailList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+            gxzd.gx_bh AS gxbh,
+            gxzd.gx_mc AS gxmc,
+            cpgx.gx_wcsl AS wcsl,
+            cpgx.gx_fpsl AS fpsl,
+            cpgx.gx_cpsl AS cpsl,
+            cpgx.gx_pcsl AS pcsl
+        FROM
+            sc_cpgxde cpgx,
+            sc_gxzdb gxzd
+        WHERE
+            cpgx.gx_bh = gxzd.gx_bh
+            <if test="ddbh != null and ddbh != ''">
+                AND cpgx.dd_dddh = #{ddbh}
+            </if>
+            <if test="bmbh != null and bmbh != ''">
+                AND cpgx.bm_bh = #{bmbh}
+            </if>
+    </select>
+
+    <select id="queryOrderRecordInfo" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT DISTINCT
+            jl.dd_dddh AS ddbh,
+            jl.cp_cpbh AS cpbh,
+            cp.cp_mc AS cpmc,
+            cp.cp_th AS cpth,
+            cp.cp_cz AS cpcz,
+            CONVERT(varchar(100), dd.dd_jhrq, 23) AS jhrq,
+            dd.pc_pcsl AS pcsl,
+            bm.bm_mc AS bmmc,
+            ry.ry_xm AS ryxm,
+            jl.bm_bh AS bmbh,
+            jl.ry_bh AS rybh
+        FROM
+            sc_jldjb jl,
+            yw_cpxxb cp,
+            sc_scddb dd,
+            rz_bmxxb bm,
+            rz_ryxxb ry
+        WHERE
+            jl.cp_cpbh = cp.cp_cpbh
+          AND jl.dd_dddh = dd.dd_dddh
+          AND jl.bm_bh = bm.bm_bh
+          AND jl.ry_bh = ry.ry_bh
+        <if test="ddbh != null and ddbh != ''">
+            AND jl.dd_dddh = #{ddbh}
+        </if>
+        <if test="rybh != null and rybh != ''">
+            AND ry.ry_bh = #{rybh}
+        </if>
+
+
+    </select>
+
+    <select id="queryOrderProcessList" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT DISTINCT
+            jl.gx_bh as gxbh,
+            gx.gx_mc as gxmc
+        FROM
+            sc_jldjb jl,
+            rz_ryxxb ry,
+            sc_gxzdb gx
+        WHERE
+            jl.ry_bh = ry.ry_bh
+            AND jl.gx_bh = gx.gx_bh
+            <if test="ddbh != null and ddbh != ''">
+                AND jl.dd_dddh = #{ddbh}
+            </if>
+            <if test="rybh != null and rybh != ''">
+                AND ry.ry_bh = #{rybh}
+            </if>
+            order by gxbh
+
+
+    </select>
+
+    <select id="queryJobProcessList" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT DISTINCT
+            jl.dj_gzdh as gzdh,
+            jl.dj_ch as jjdh,
+            CONVERT(varchar(100), jl.dj_scrq, 20) as djrq,
+            gx.gx_bh as gxbh,
+            gx.gx_mc as gxmc,
+            jl.dj_zpsl as zpsl,
+            jl.dj_fpsl as fpsl,
+            jl.dj_cpsl as cpsl
+        FROM
+            sc_jldjb jl,
+            rz_ryxxb ry ,
+            sc_gxzdb gx
+        WHERE
+            jl.ry_bh = ry.ry_bh
+            AND gx.gx_bh = jl.gx_bh
+        <if test="ddbh != null and ddbh != ''">
+            AND jl.dd_dddh = #{ddbh}
+        </if>
+        <if test="rybh != null and rybh != ''">
+            AND ry.ry_bh = #{rybh}
+        </if>
+        <if test="gxbh != null and gxbh != ''">
+            AND jl.gx_bh = #{gxbh}
+        </if>
+        <if test="gzdh != null and gzdh != ''">
+            AND jl.dj_gzdh = #{gzdh}
+        </if>
+        <if test="jjdh != null and jjdh != ''">
+            AND jl.dj_ch = #{jjdh}
+        </if>
+
+        order by djrq,gxbh
+
+
+    </select>
+
+    <select id="queryCustomerList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+            kh.kh_bh AS khbh,
+            kh.kh_mc AS khmc,
+            kh.kh_gsdz AS gsdz
+        FROM
+            yw_khxxb kh
+        WHERE
+              1 = 1
+        <if test="khfl != null and khfl != ''">
+            AND kh.kh_fl = #{khfl}
+        </if>
+        <if test="khbh != null and khbh != ''">
+            AND kh.kh_bh = #{khbh}
+        </if>
+
+    </select>
+
+    <select id="queryPersonnelJobProcessList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+            t.gx_bh AS gxbh,
+            t.gx_mc AS gxmc
+        FROM
+            rz_gwgx t
+        WHERE 1 = 1
+        <if test="rybh != null and rybh != ''">
+            AND t.ry_bh = #{rybh}
+        </if>
+        order by gxbh
+
+    </select>
+
+    <select id="queryTrackNumberList" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT DISTINCT
+            djb.dj_gzdh AS gzdh,
+            djb.dd_dddh as ddbh,
+            djb.cp_cpbh as cpbh
+        FROM
+            sc_jldjb djb
+        WHERE 1 = 1
+            AND djb.dj_gzdh IS NOT NULL
+            <if test="ddbh != null and ddbh != ''">
+                AND djb.dd_dddh = #{ddbh}
+            </if>
+            <if test="cpbh != null and cpbh != ''">
+                AND djb.cp_cpbh= #{cpbh}
+            </if>
+            AND djb.dj_gzdh IS NOT NULL
+            order by gzdh
+    </select>
+
+    <select id="queryHandoverNumberList" parameterType="java.lang.String" resultType="java.util.Map">
+
+        SELECT DISTINCT
+            djb.dj_ch AS jjdh,
+            djb.dd_dddh as ddbh,
+            djb.cp_cpbh as cpbh
+        FROM
+            sc_jldjb djb
+        WHERE 1 = 1
+            AND djb.dj_ch IS NOT NULL
+            <if test="ddbh != null and ddbh != ''">
+                AND djb.dd_dddh = #{ddbh}
+            </if>
+            <if test="cpbh != null and cpbh != ''">
+                AND djb.cp_cpbh= #{cpbh}
+            </if>
+          AND djb.dj_ch IS NOT NULL
+          order by jjdh
+
+    </select>
+
+    <select id="queryScrapReasonList" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT
+            fc.yy_bh AS yybh,
+            fc.yy AS yy,
+            fc.gx_bh AS gxbh,
+            fc.gx_mc AS gxmc,
+            fc.tjbz AS tjbz,
+            fc.bm_bh AS bmbh,
+            '0' as sl
+        FROM
+            zg_fcdzb fc
+        WHERE 1 = 1
+            <if test='fclb != null and fclb == "0"'>
+                AND fc.tjbz = 0
+            </if>
+            <if test='fclb != null and fclb == "1"'>
+                AND fc.tjbz &lt;&gt; 0
+            </if>
+            <if test="gxbh != null and gxbh != ''">
+                AND fc.gx_bh = #{gxbh}
+            </if>
+
+
+    </select>
+
+    <select id="queryTrackOrderAmount" parameterType="java.lang.String" resultType="java.util.Map" >
+
+        SELECT SUM
+        ( djb.dj_wcsl ) AS wcsl,
+        djb.dd_dddh AS ddbh,
+        djb.cp_cpbh AS cpbh,
+        djb.gx_bh AS gxbh,
+        djb.dj_gzdh AS gzdh
+        FROM
+        sc_jldjb djb
+        WHERE 1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND djb.dd_dddh = #{ddbh}
+        </if>
+        <if test="cpbh != null and cpbh != ''">
+            AND djb.cp_cpbh = #{cpbh}
+        </if>
+
+        <if test="gxbh != null and gxbh != ''">
+            AND djb.gx_bh = #{gxbh}
+        </if>
+        <if test="gzdh != null and gzdh != ''">
+            AND djb.dj_gzdh = #{gzdh}
+        </if>
+
+        GROUP BY
+        djb.dd_dddh,
+        djb.cp_cpbh,
+        djb.gx_bh,
+        djb.dj_gzdh
+
+    </select>
+
+    <select id="queryHandoverOrderProcessNumber" parameterType="java.lang.String" resultType="java.util.Map"  >
+        SELECT
+            de.yl1 AS jjgx,
+            de.gx_pcsl AS pcsl
+        FROM
+            sc_cpgxde de
+        WHERE 1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND de.dd_dddh = #{ddbh}
+        </if>
+        <if test="cpbh != null and cpbh != ''">
+            AND de.cp_cpbh = #{cpbh}
+        </if>
+
+        <if test="gxbh != null and gxbh != ''">
+            AND de.gx_bh = #{gxbh}
+        </if>
+    </select>
+
+    <select id="queryProductionRegistrationOrderInfo" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT
+            dd.dd_dddh AS ddbh,
+            cp.cp_cpbh AS cpbh,
+            cp.cp_mc AS cpmc,
+            cp.cp_th AS cpth,
+            cp.cp_cz AS cpcz,
+            CONVERT ( VARCHAR ( 100 ), dd.dd_jhrq, 23 ) AS jhrq,
+            dd.pc_pcsl AS pcsl,
+            ry.ry_bh AS rybh,
+            ry.ry_xm AS ryxm,
+            bm.bm_bh AS bmbh,
+            bm.bm_mc AS bmmc
+        FROM
+            yw_cpxxb cp,
+            sc_scddb dd,
+            rz_ryxxb ry,
+            rz_bmxxb bm
+        WHERE
+            1 = 1
+          AND cp.cp_cpbh = dd.cp_cpbh
+          AND ry.bm_bh = bm.bm_bh
+          <if test="ddbh != null and ddbh != ''">
+              AND dd.dd_dddh = #{ddbh}
+          </if>
+        <if test="rybh != null and rybh != ''">
+            AND ry.ry_bh = #{rybh}
+        </if>
+
+    </select>
+
+    <select id="queryProcessAmount" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT SUM( scjl.mx_sl ) sl,
+        scjl.dd_dddh as ddbh,
+        scjl.gx_bh as gxbh,
+        scjl.mx_fclb as fclb
+        FROM
+            sc_scjlb scjl
+        WHERE
+            1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND scjl.dd_dddh = #{ddbh}
+        </if>
+        <if test="gxbh != null and gxbh != ''">
+            AND scjl.gx_bh = #{gxbh}
+        </if>
+        <if test="fclb != null and fclb != ''">
+            AND scjl.mx_fclb  = #{fclb}
+        </if>
+        group by scjl.dd_dddh,scjl.gx_bh,scjl.mx_fclb
+    </select>
+    <select id="queryProcessHandoverAmount" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT SUM( jlb.mx_sl ) sl,
+               jlb.dd_dddh as ddbh,
+               jlb.gx_bh as gxbh
+        FROM
+            sc_scjlb jlb
+        WHERE 1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND jlb.dd_dddh = #{ddbh}
+        </if>
+          AND jlb.gx_bh IN ( SELECT DISTINCT gxde.yl1 AS gxbh FROM sc_cpgxde gxde WHERE  1 = 1
+        <if test="ddbh != null and ddbh != ''">
+            AND gxde.dd_dddh = #{ddbh}
+        </if>
+        <if test="gxbh != null and gxbh != ''">
+            AND gxde.gx_bh = #{gxbh}
+        </if>
+          )
+        group by jlb.dd_dddh, jlb.gx_bh
+    </select>
+
+    <select id="queryScrapReasonsByDjbh" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT DISTINCT
+            jlb.mx_yy AS yybh,
+            dzb.gx_bh AS gxbh,
+            dzb.gx_mc AS gxmc,
+            dzb.tjbz AS tjbz,
+            dzb.bm_bh AS bmbh,
+            jlb.mx_sl AS sl,
+            dzb.yy AS yy
+        FROM
+            sc_scjlb jlb,
+            zg_fcdzb dzb
+        WHERE
+            jlb.mx_yy = dzb.yy_bh
+        <if test="ddbh != null and ddbh != ''">
+            AND jlb.dj_bh = #{ddbh}
+        </if>
+        <if test="fclb != null and fclb != ''">
+            AND jlb.mx_fclb = #{gxbh}
+        </if>
+        ORDER BY
+            jlb.mx_yy
+    </select>
+
+
+
+
+
+
+</mapper>
