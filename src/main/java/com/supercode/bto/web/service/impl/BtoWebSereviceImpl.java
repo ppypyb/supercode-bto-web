@@ -57,6 +57,8 @@ public class BtoWebSereviceImpl implements IBtoWebService {
     /** 表主键**/
     private SimpleDateFormat keySdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
+    private SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     public RestResult verifyRegistrationCode(String registrationCode) {
         try {
@@ -241,16 +243,28 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 }
                 List<Map<String,Object>> bmOrderList = btoWebMapper.queryDepartmentOrderList(ddbh,jhwcsjFiled,scwcsjFiled,scjjslFiled,scwcslFiled,scfpslFiled);
                 if(bmOrderList != null && bmOrderList.size() > 0){
-                    String jhwcsj = String.valueOf(bmOrderList.get(0).get("jhwcsj"));
-                    String scwcsj = String.valueOf(bmOrderList.get(0).get("scwcsj"));
+                    String jhwcsj = "";
+                    String scwcsj = "";
+                    if(bmOrderList.get(0).get("jhwcsj") != null){
+                        jhwcsj = String.valueOf(bmOrderList.get(0).get("jhwcsj"));
+                    }
+                    if(bmOrderList.get(0).get("scwcsj") != null){
+                        scwcsj = String.valueOf(bmOrderList.get(0).get("scwcsj"));
+                    }
                     String scjjsl = "";
                     if(bmOrderList.get(0).get("scjjsl") instanceof  Integer){
                         scjjsl = String.valueOf(bmOrderList.get(0).get("scjjsl"));
                     }else if(bmOrderList.get(0).get("scjjsl") instanceof  Double){
                         scjjsl = String.valueOf(new Double((Double) bmOrderList.get(0).get("scjjsl")).intValue());
                     }
-                    String scwcsl = String.valueOf(bmOrderList.get(0).get("scwcsl"));
-                    String scfpsl = String.valueOf(bmOrderList.get(0).get("scfpsl"));
+                    String scwcsl = "0";
+                    if(bmOrderList.get(0).get("scwcsl") != null){
+                        scwcsl =  String.valueOf(bmOrderList.get(0).get("scwcsl"));
+                    }
+                    String scfpsl = "";
+                    if(bmOrderList.get(0).get("scfpsl") != null){
+                        scfpsl = String.valueOf(bmOrderList.get(0).get("scfpsl"));
+                    }
                     String scsysl = "0";
                     if(StringUtils.isNotBlank(scjjsl)){
                         if(StringUtils.isNotBlank(scwcsl) && !StringUtils.equals(scwcsl,"0")){
@@ -384,14 +398,23 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             if(scJldjbList != null && scJldjbList.size() > 0){
                 ScJldjb scJldjb = scJldjbList.get(0);
                 String djbh = scJldjb.getDj_bh();
-                if(StringUtils.equals(fclb,"0")){
-                    result = btoWebMapper.queryScrapReasonsByDjbh(djbh,"1");
-                }
-                if(StringUtils.equals(fclb,"1")){
-                    result = btoWebMapper.queryScrapReasonsByDjbh(djbh,"2");
+                result = btoWebMapper.queryScrapReasonsByDjbh(djbh,fclb);
+                if(result == null || result.size() ==0){
+                    if(StringUtils.equals(fclb,"2")){
+                        result = btoWebMapper.queryScrapReasonList(gxbh,"0");
+                    }
+                    if(StringUtils.equals(fclb,"1")){
+                        result = btoWebMapper.queryScrapReasonList(gxbh,"1");
+                    }
+
                 }
             }else{
-                result = btoWebMapper.queryScrapReasonList(gxbh,fclb);
+                if(StringUtils.equals(fclb,"2")){
+                    result = btoWebMapper.queryScrapReasonList(gxbh,"0");
+                }
+                if(StringUtils.equals(fclb,"1")){
+                    result = btoWebMapper.queryScrapReasonList(gxbh,"1");
+                }
             }
 
         }catch (Exception e){
@@ -490,9 +513,13 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 for(ScJldjb scJldjb : scJldjbList){
                     scJldjb.setCp_cpbh(cpbh);
                     scJldjb.setBm_bh(bmbh);
+                    scJldjb.setGx_bh(gxbh);
+                    scJldjb.setRy_bh(rybh);
+                    scJldjb.setDj_djr(rybh);
+                    scJldjb.setDj_gzdh(gzdh);
+                    scJldjb.setDj_ch(jjdh);
                     if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
                         scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
-                        scJldjb.setDj_gzdh(gzdh);
                         pcsl = scCpgxdeList.get(0).getGx_pcsl();
                     }
                     if(StringUtils.isNotBlank(zpsl) && !StringUtils.equals(zpsl,"0")){
@@ -504,13 +531,26 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
                         scJldjb.setDj_cpsl(cpsl);
                     }
+                    if(StringUtils.isBlank(zpsl)){
+                        zpsl = "0";
+                    }
+                    if(StringUtils.isBlank(fpsl)){
+                        fpsl = "0";
+                    }
+                    if(StringUtils.isBlank(cpsl)){
+                        cpsl = "0";
+                    }
                     String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
                     if(!StringUtils.equals(wcsl,"0")){
                         scJldjb.setDj_wcsl(wcsl);
+                    }else{
+                        scJldjb.setDj_wcsl("0");
                     }
                     if(StringUtils.isNotBlank(pcsl)){
                         String wclsl = String.valueOf(Integer.valueOf(pcsl) - Integer.valueOf(wcsl));
                         scJldjb.setDj_wclsl(wclsl);
+                    }else{
+                        scJldjb.setDj_wclsl("0");
                     }
                     scJldjb.setDj_tjbz("1");
                     djbh = scJldjb.getDj_bh();
@@ -530,27 +570,38 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 scJldjb.setCp_cpbh(cpbh);
                 scJldjb.setBm_bh(bmbh);
                 scJldjb.setGx_bh(gxbh);
+                scJldjb.setDj_ch(jjdh);
+                scJldjb.setDj_gzdh(gzdh);
                 if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
                     scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
-                    scJldjb.setDj_gzdh(gzdh);
                     pcsl = scCpgxdeList.get(0).getGx_pcsl();
                 }
                 if(StringUtils.isNotBlank(zpsl) && !StringUtils.equals(zpsl,"0")){
                     scJldjb.setDj_zpsl(zpsl);
+                }else{
+                    scJldjb.setDj_zpsl("0");
                 }
                 if(StringUtils.isNotBlank(fpsl) && !StringUtils.equals(fpsl,"0")){
                     scJldjb.setDj_fpsl(fpsl);
+                }else{
+                    scJldjb.setDj_fpsl("0");
                 }
                 if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
                     scJldjb.setDj_cpsl(cpsl);
+                }else{
+                    scJldjb.setDj_fpsl("0");
                 }
                 String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
                 if(!StringUtils.equals(wcsl,"0")){
                     scJldjb.setDj_wcsl(wcsl);
+                }else{
+                    scJldjb.setDj_wcsl("0");
                 }
                 if(StringUtils.isNotBlank(pcsl)){
                     String wclsl = String.valueOf(Integer.valueOf(pcsl) - Integer.valueOf(wcsl));
                     scJldjb.setDj_wclsl(wclsl);
+                }else{
+                    scJldjb.setDj_wclsl("0");
                 }
                 scJldjb.setDj_tjbz("1");
                 scJldjbService.insert(scJldjb);

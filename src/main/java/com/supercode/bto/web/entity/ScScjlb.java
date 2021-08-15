@@ -38,7 +38,7 @@ public class ScScjlb extends Model<ScScjlb> {
     /** 废次类别**/
     private String mx_fclb;
     /** 数量**/
-    private String mx_sl;
+    private String mx_sl = "0";
     /** 原因**/
     private String mx_yy;
     /** 提交标志**/

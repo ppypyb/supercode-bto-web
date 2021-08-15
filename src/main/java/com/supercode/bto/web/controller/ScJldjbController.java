@@ -43,7 +43,7 @@ public class ScJldjbController {
             Date now = new Date();
             logger.info("insert {}",now.getTime());
             scJldjb.setDj_bh(String.valueOf(now.getTime()));
-            return scJldjbService.insert(scJldjb);
+            return ResultUtil.success(scJldjbService.insert(scJldjb));
         }catch (Exception e){
             return ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
         }

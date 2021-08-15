@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface IScJldjbService extends IService<ScJldjb> {
 
-    public RestResult insert(ScJldjb scJldjb);
+    public String insert(ScJldjb scJldjb);
 
     public List<ScJldjb> getByDjbh(String djbh);
 

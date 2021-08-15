@@ -35,9 +35,6 @@
                 WHERE
                 cp.cp_cpbh = scddb.cp_cpbh
                 AND scddb.dd_zt &lt;&gt; '0'
-                AND cp.kh_bh = '1001'
-                AND DATEDIFF( DAY, '2021-03-05', scddb.pc_zdrq ) > 0
-                AND DATEDIFF( DAY, scddb.pc_zdrq, '2022-01-03' ) > 0
 
             <if test="khbh != null and khbh != ''">
                 AND cp.kh_bh = #{khbh}
@@ -63,10 +60,10 @@
     <select id="queryDepartmentOrderList" parameterType="java.lang.String" resultType="java.util.Map">
         SELECT
         <if test="jhwcsjFiled != null">
-            ${jhwcsjFiled} AS jhwcsj,
+            CONVERT ( VARCHAR ( 100 ), ${jhwcsjFiled}, 23 ) AS jhwcsj,
         </if>
         <if test="scwcsjFiled != null">
-            ${scwcsjFiled} AS scwcsj,
+            CONVERT ( VARCHAR ( 100 ), ${scwcsjFiled} , 23 ) AS scwcsj,
         </if>
         <if test="scjjslFiled != null">
             ${scjjslFiled} AS scjjsl,
@@ -439,11 +436,11 @@
             zg_fcdzb dzb
         WHERE
             jlb.mx_yy = dzb.yy_bh
-        <if test="ddbh != null and ddbh != ''">
-            AND jlb.dj_bh = #{ddbh}
+        <if test="djbh != null and djbh != ''">
+            AND jlb.dj_bh = #{djbh}
         </if>
         <if test="fclb != null and fclb != ''">
-            AND jlb.mx_fclb = #{gxbh}
+            AND jlb.mx_fclb = #{fclb}
         </if>
         ORDER BY
             jlb.mx_yy

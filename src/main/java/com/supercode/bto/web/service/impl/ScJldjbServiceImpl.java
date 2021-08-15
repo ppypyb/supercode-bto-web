@@ -2,14 +2,12 @@ package com.supercode.bto.web.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.supercode.bto.web.entity.RzBmxxb;
 import com.supercode.bto.web.entity.ScJldjb;
 import com.supercode.bto.web.mapper.ScJldjbMapper;
-import com.supercode.bto.web.pojos.restful.RestResult;
-import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
 import com.supercode.bto.web.service.IScJldjbService;
-import com.supercode.bto.web.utils.restful.ResultUtil;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +21,20 @@ import java.util.List;
  */
 @Service
 public class ScJldjbServiceImpl extends ServiceImpl<ScJldjbMapper, ScJldjb> implements IScJldjbService {
+
+    private Logger logger = LoggerFactory.getLogger(ScJldjbServiceImpl.class);
     @Autowired
     private ScJldjbMapper scJldjbMapper;
 
     @Override
-    public RestResult insert(ScJldjb scJldjb) {
+    public String insert(ScJldjb scJldjb) {
         try {
             scJldjbMapper.insert(scJldjb);
-            return ResultUtil.success("插入成功 "+scJldjb.getDj_bh());
+            return scJldjb.getDj_bh();
         }catch (Exception e){
-            return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION);
+            logger.error("scjlb insert djbh {} error {}",scJldjb.getDj_bh(),e);
         }
+        return null;
 
     }
 

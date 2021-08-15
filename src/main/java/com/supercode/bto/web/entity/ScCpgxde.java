@@ -45,17 +45,17 @@ public class ScCpgxde extends Model<ScCpgxde> {
     /** 预留 **/
     private String yl2;
     /** 排产数量 **/
-    private String gx_pcsl;
+    private String gx_pcsl = "0";
     /** 完成数量 **/
-    private String gx_wcsl;
+    private String gx_wcsl = "0";
     /** 废品数量 **/
-    private String gx_fpsl;
+    private String gx_fpsl = "0";
     /** 次品数量 **/
-    private String gx_cpsl;
+    private String gx_cpsl = "0";
     /** 提交数量 **/
-    private String gx_tjsl;
+    private String gx_tjsl = "0";
     /** 剩余工时 **/
-    private String gx_sygs;
+    private String gx_sygs = "0";
     /** 完成时间 **/
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
@@ -67,9 +67,9 @@ public class ScCpgxde extends Model<ScCpgxde> {
     /** 默认工序 **/
     private String gx_mrbz;
     /** 未处理数量 **/
-    private String gx_wclsl;
+    private String gx_wclsl = "0";
     /** 交接数量 **/
-    private String gx_jjsl;
+    private String gx_jjsl = "0";
 
     private String hk_ssje;
 

@@ -650,7 +650,7 @@ public class BtoWebController {
                                                             @RequestParam(name = "fpsl") String fpsl,
                                                             @RequestParam(name = "cpsl") String cpsl){
         try {
-            logger.info("updateProductionRegistrationOrderInfo ddbh  {} cpbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",ddbh,cpbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
+            logger.info("updateProductionRegistrationOrderInfo ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
             return btoWebService.updateProductionRegistrationOrderInfo(ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
 
         } catch (Exception e) {

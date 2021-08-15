@@ -72,25 +72,32 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
 
             byte[] fileBytes = file.getBytes();
             JSONObject numberJsobj = aipOcrClient.basicGeneral(fileBytes, options);
-            JSONArray jsonArray = numberJsobj.getJSONArray("words_result");
-            List<Object> numberList = jsonArray.toList();
-            if(numberList != null && numberList.size() > 0){
-                for(Object json:numberList){
-                    if(json instanceof Map){
-                        if(((Map<String, String>) json).containsKey("words")){
-                            Map<String,String> jsonMap = (Map<String, String>) json;
-                            String words = jsonMap.get("words");
-                            if(!isContainChinese(words)){
-                                if(!StringUtils.contains(words,"NO")){
-                                    jsonData = jsonData + words;
+            logger.info("百度 numberJsobj {}",numberJsobj);
+            if(numberJsobj.keySet().contains("words_result")){
+                JSONArray jsonArray = numberJsobj.getJSONArray("words_result");
+                List<Object> numberList = jsonArray.toList();
+                if(numberList != null && numberList.size() > 0){
+                    for(Object json:numberList){
+                        if(json instanceof Map){
+                            if(((Map<String, String>) json).containsKey("words")){
+                                Map<String,String> jsonMap = (Map<String, String>) json;
+                                String words = jsonMap.get("words");
+                                if(!isContainChinese(words)){
+                                    if(!StringUtils.contains(words,"NO")){
+                                        jsonData = jsonData + words;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if(StringUtils.isBlank(jsonData)){
+            jsonData = "0";
         }
         return jsonData;
     }

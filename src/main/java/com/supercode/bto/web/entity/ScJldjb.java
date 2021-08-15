@@ -37,17 +37,17 @@ public class ScJldjb extends Model<ScJldjb> {
     /** 登记人**/
     private String dj_djr;
     /** 完成数量**/
-    private String dj_wcsl;
+    private String dj_wcsl = "0";
     /** 正品数量**/
-    private String dj_zpsl;
+    private String dj_zpsl = "0";
     /** 次品数量**/
-    private String dj_cpsl;
+    private String dj_cpsl = "0";
     /** 废品数量**/
-    private String dj_fpsl;
+    private String dj_fpsl = "0";
     /** 未处理数量**/
-    private String dj_wclsl;
+    private String dj_wclsl = "0";
     /** 提交标志**/
-    private String dj_tjbz;
+    private String dj_tjbz = "0";
     /** 跟踪单号**/
     private String dj_gzdh;
     /** 车号**/
