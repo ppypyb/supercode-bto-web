@@ -246,14 +246,8 @@ public class BtoWebController {
                     if(StringUtils.isNotBlank(rykhbh)){
                         List<Map<String,Object>> resultList = btoWebService.queryCustomerList(rykhbh);
                         if(resultList != null && resultList.size() > 0){
-                            Map<String,Object> map = new HashMap<>();
-                            map.put("khbh","");
-                            map.put("khmc","");
-                            map.put("khdz","");
-                            resultList.add(0,map);
                             return ResultUtil.success(resultList);
                         }
-
                     }else{
                         List<Map<String,Object>> resultList = btoWebService.queryCustomerList(null);
                         if(resultList != null && resultList.size() > 0){
@@ -627,6 +621,7 @@ public class BtoWebController {
             @ApiResponse(code = 40001, message = "参数为空"),
             @ApiResponse(code = 50001, message = "内部接口调用异常")})
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "djbh" , value = "登记编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "ddbh" , value = "订单编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "cpbh" , value = "产品编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "rybh" , value = "人员编号" , paramType = "query" , required = true,  dataType = "String"),
@@ -639,7 +634,8 @@ public class BtoWebController {
             @ApiImplicitParam(name = "cpsl" , value = "次品数量" , paramType = "query" , required = false,  dataType = "String")
     })
     @RequestMapping(value = "updateProductionRegistrationOrderInfo",method = RequestMethod.GET)
-    public RestResult updateProductionRegistrationOrderInfo(@RequestParam(name = "ddbh") String ddbh,
+    public RestResult updateProductionRegistrationOrderInfo(@RequestParam(name = "djbh") String djbh,
+                                                            @RequestParam(name = "ddbh") String ddbh,
                                                             @RequestParam(name = "cpbh") String cpbh,
                                                             @RequestParam(name = "rybh") String rybh,
                                                             @RequestParam(name = "bmbh") String bmbh,
@@ -650,8 +646,8 @@ public class BtoWebController {
                                                             @RequestParam(name = "fpsl") String fpsl,
                                                             @RequestParam(name = "cpsl") String cpsl){
         try {
-            logger.info("updateProductionRegistrationOrderInfo ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
-            return btoWebService.updateProductionRegistrationOrderInfo(ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
+            logger.info("updateProductionRegistrationOrderInfo djbh {} ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
+            return btoWebService.updateProductionRegistrationOrderInfo(djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
 
         } catch (Exception e) {
             logger.error("queryScrapReasonList {}",e);
@@ -722,7 +718,7 @@ public class BtoWebController {
             logger.info("接收到文件开始识别：{}",System.currentTimeMillis());
             String numbers = baiduAipService.nubmers(file);
             picNumbers.put("numbers",numbers);
-            logger.info("识别结束：{}",System.currentTimeMillis());
+            logger.info("识别结束：{} {} ",System.currentTimeMillis(),picNumbers);
             return ResultUtil.success(picNumbers);
         } catch (Exception e) {
             e.printStackTrace();

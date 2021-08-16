@@ -155,7 +155,7 @@ public interface IBtoWebService {
      * @date: 2021/7/25 15:25
      * @return:
      */
-    RestResult updateProductionRegistrationOrderInfo(String ddbh,String cpbh,String rybh,String bmbh,String gxbh,String gzdh,String jjdh,String zpsl,String fpsl,String cpsl);
+    RestResult updateProductionRegistrationOrderInfo(String djbh,String ddbh,String cpbh,String rybh,String bmbh,String gxbh,String gzdh,String jjdh,String zpsl,String fpsl,String cpsl);
 
     /**
      * @description: 废次品登记

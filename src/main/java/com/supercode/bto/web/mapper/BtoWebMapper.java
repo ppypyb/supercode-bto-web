@@ -206,7 +206,9 @@ public interface BtoWebMapper {
      * @date: 2021/8/8 21:41
      * @return:
      */
-    List<Map<String,Object>> queryScrapReasonsByDjbh(@Param("djbh") String djbh,
+    List<Map<String,Object>> queryScrapReasons(@Param("ddbh") String ddbh,
+                                               @Param("rybh") String rybh,
+                                               @Param("gxbh") String gxbh,
                                                      @Param("fclb") String fclb);
 
 

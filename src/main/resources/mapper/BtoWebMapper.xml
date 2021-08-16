@@ -40,7 +40,7 @@
                 AND cp.kh_bh = #{khbh}
             </if>
             <if test="htbh != null and htbh != ''">
-                AND scddb.ht_bh = #{htbh}
+                AND scddb.ht_bh LIKE  '%'+#{htbh}+'%'
             </if>
             <if test="ddbh != null and ddbh != ''">
                 AND scddb.dd_dddh = #{ddbh}
@@ -422,26 +422,43 @@
         group by jlb.dd_dddh, jlb.gx_bh
     </select>
 
-    <select id="queryScrapReasonsByDjbh" parameterType="java.lang.String" resultType="java.util.Map" >
-        SELECT DISTINCT
-            jlb.mx_yy AS yybh,
-            dzb.gx_bh AS gxbh,
-            dzb.gx_mc AS gxmc,
-            dzb.tjbz AS tjbz,
-            dzb.bm_bh AS bmbh,
-            jlb.mx_sl AS sl,
-            dzb.yy AS yy
+    <select id="queryScrapReasons" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT
+        jlb.mx_yy AS yybh,
+        jlb.gx_bh AS gxbh,
+        dzb.gx_mc AS gxmc,
+        SUM ( jlb.mx_sl ) AS sl,
+        dzb.yy AS yy
         FROM
-            sc_scjlb jlb,
-            zg_fcdzb dzb
+        sc_scjlb jlb,
+        zg_fcdzb dzb
         WHERE
-            jlb.mx_yy = dzb.yy_bh
-        <if test="djbh != null and djbh != ''">
-            AND jlb.dj_bh = #{djbh}
+        jlb.gx_bh = dzb.gx_bh
+        AND jlb.mx_yy = dzb.yy_bh
+        <if test="ddbh != null and ddbh != ''">
+            AND jlb.dd_dddh = #{ddbh}
+        </if>
+        <if test="rybh != null and rybh != ''">
+            AND jlb.ry_bh = #{rybh}
+        </if>
+        <if test="gxbh != null and gxbh != ''">
+            AND jlb.gx_bh = #{gxbh}
         </if>
         <if test="fclb != null and fclb != ''">
             AND jlb.mx_fclb = #{fclb}
         </if>
+        <if test='fclb != null and fclb == "2"'>
+            AND dzb.tjbz = '0'
+        </if>
+        <if test='fclb != null and fclb == "1"'>
+            AND dzb.tjbz &lt;&gt; '0'
+        </if>
+        GROUP BY
+        jlb.mx_yy,
+        jlb.gx_bh,
+        dzb.yy,
+        dzb.gx_mc
+
         ORDER BY
             jlb.mx_yy
     </select>

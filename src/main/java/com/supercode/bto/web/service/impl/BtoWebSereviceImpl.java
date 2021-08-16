@@ -394,28 +394,17 @@ public class BtoWebSereviceImpl implements IBtoWebService {
     public List<Map<String, Object>> queryScrapReasonList(String ddbh,String rybh,String gxbh,String gzdh,String jjdh, String fclb) {
         List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
         try{
-            List<ScJldjb> scJldjbList = scJldjbService.queryScjlbList(ddbh, rybh, gxbh, gzdh, jjdh);
-            if(scJldjbList != null && scJldjbList.size() > 0){
-                ScJldjb scJldjb = scJldjbList.get(0);
-                String djbh = scJldjb.getDj_bh();
-                result = btoWebMapper.queryScrapReasonsByDjbh(djbh,fclb);
-                if(result == null || result.size() ==0){
-                    if(StringUtils.equals(fclb,"2")){
-                        result = btoWebMapper.queryScrapReasonList(gxbh,"0");
-                    }
-                    if(StringUtils.equals(fclb,"1")){
-                        result = btoWebMapper.queryScrapReasonList(gxbh,"1");
-                    }
-
-                }
-            }else{
+            result = btoWebMapper.queryScrapReasons(ddbh,rybh,gxbh,fclb);
+            if(result == null || result.size() ==0){
                 if(StringUtils.equals(fclb,"2")){
                     result = btoWebMapper.queryScrapReasonList(gxbh,"0");
                 }
                 if(StringUtils.equals(fclb,"1")){
                     result = btoWebMapper.queryScrapReasonList(gxbh,"1");
                 }
+
             }
+
 
         }catch (Exception e){
             logger.error("queryTrackingNumberList error {}",e);
@@ -503,14 +492,25 @@ public class BtoWebSereviceImpl implements IBtoWebService {
     }
 
     @Override
-    public RestResult updateProductionRegistrationOrderInfo(String ddbh,String cpbh,String rybh,String bmbh, String gxbh, String gzdh, String jjdh, String zpsl, String fpsl, String cpsl) {
+    public RestResult updateProductionRegistrationOrderInfo(String djbh,String ddbh,String cpbh,String rybh,String bmbh, String gxbh, String gzdh, String jjdh, String zpsl, String fpsl, String cpsl) {
         try{
-            List<ScJldjb> scJldjbList = scJldjbService.queryScjlbList(ddbh, rybh, gxbh, gzdh, jjdh);
+//            List<ScJldjb> scJldjbList = scJldjbService.queryScjlbList(ddbh, rybh, gxbh, gzdh, jjdh);
+            List<ScJldjb> scJldjbList = scJldjbService.getByDjbh(djbh);
             List<ScCpgxde> scCpgxdeList = scCpgxdeService.selectByDdbhAndGxbh(ddbh,gxbh);
             String pcsl = "";
-            String djbh = "";
+            if(StringUtils.isBlank(zpsl)){
+                zpsl = "0";
+            }
+            if(StringUtils.isBlank(fpsl)){
+                fpsl = "0";
+            }
+            if(StringUtils.isBlank(cpsl)){
+                cpsl = "0";
+            }
+            String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
             if(scJldjbList != null && scJldjbList.size() > 0){
                 for(ScJldjb scJldjb : scJldjbList){
+                    scJldjb.setDd_dddh(ddbh);
                     scJldjb.setCp_cpbh(cpbh);
                     scJldjb.setBm_bh(bmbh);
                     scJldjb.setGx_bh(gxbh);
@@ -531,16 +531,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
                         scJldjb.setDj_cpsl(cpsl);
                     }
-                    if(StringUtils.isBlank(zpsl)){
-                        zpsl = "0";
-                    }
-                    if(StringUtils.isBlank(fpsl)){
-                        fpsl = "0";
-                    }
-                    if(StringUtils.isBlank(cpsl)){
-                        cpsl = "0";
-                    }
-                    String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
+
                     if(!StringUtils.equals(wcsl,"0")){
                         scJldjb.setDj_wcsl(wcsl);
                     }else{
@@ -552,13 +543,14 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     }else{
                         scJldjb.setDj_wclsl("0");
                     }
-                    scJldjb.setDj_tjbz("1");
-                    djbh = scJldjb.getDj_bh();
+                    scJldjb.setDj_tjbz("0");
                     UpdateWrapper<ScJldjb> scjldjbUpdateWrapper = new UpdateWrapper<>();
                     scjldjbUpdateWrapper.eq("DJ_BH",djbh);
                     scJldjbService.update(scJldjb,scjldjbUpdateWrapper);
                 }
-            }else{
+            }
+            /**
+            else{
                 ScJldjb scJldjb = new ScJldjb();
                 Calendar calendar = Calendar.getInstance();
                 djbh = keySdf.format(calendar.getTime());
@@ -572,6 +564,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 scJldjb.setGx_bh(gxbh);
                 scJldjb.setDj_ch(jjdh);
                 scJldjb.setDj_gzdh(gzdh);
+
                 if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
                     scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
                     pcsl = scCpgxdeList.get(0).getGx_pcsl();
@@ -591,7 +584,6 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 }else{
                     scJldjb.setDj_fpsl("0");
                 }
-                String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
                 if(!StringUtils.equals(wcsl,"0")){
                     scJldjb.setDj_wcsl(wcsl);
                 }else{
@@ -603,14 +595,15 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 }else{
                     scJldjb.setDj_wclsl("0");
                 }
-                scJldjb.setDj_tjbz("1");
+                scJldjb.setDj_tjbz("0");
                 scJldjbService.insert(scJldjb);
-            }
+            } ***/
 
             List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndGxbh(djbh,gxbh);
             if(scScjlbList != null && scScjlbList.size() > 0){
                 for(ScScjlb scScjlb : scScjlbList){
                     scScjlb.setMx_tjbz("1");
+                    scScjlb.setDj_bh(djbh);
                     UpdateWrapper<ScScjlb> scScjlbUpdateWrapper = new UpdateWrapper<>();
                     scScjlbUpdateWrapper.eq("DJ_JLBH", scScjlb.getDj_jlbh());
                     scScjlbService.update(scScjlb,scScjlbUpdateWrapper);
@@ -624,32 +617,58 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             List<Map<String,Object>> wcslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"0");
             if(wcslList != null && wcslList.size() > 0){
                 String gxdeWcsl = String.valueOf(wcslList.get(0).get("sl"));
+                if(StringUtils.isBlank(gxdeWcsl)){
+                    gxdeWcsl = "0";
+                }
+                gxdeWcsl = String.valueOf(Integer.valueOf(gxdeWcsl) + Integer.valueOf(wcsl));
                 scCpgxde.setGx_wcsl(gxdeWcsl);
             }
             /** 查询工序废品数量**/
             List<Map<String,Object>> fpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"2");
             if(fpslList != null && fpslList.size() > 0){
                 String gxdeFpsl = String.valueOf(fpslList.get(0).get("sl"));
+                if(StringUtils.isBlank(gxdeFpsl)){
+                    gxdeFpsl = "0";
+                }
+                gxdeFpsl = String.valueOf(Integer.valueOf(gxdeFpsl) + Integer.valueOf(fpsl));
                 scCpgxde.setGx_fpsl(gxdeFpsl);
             }
             /** 查询工序废品数量**/
             List<Map<String,Object>> cpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"1");
             if(cpslList != null && cpslList.size() > 0){
                 String gxdeCpsl = String.valueOf(cpslList.get(0).get("sl"));
+                if(StringUtils.isBlank(gxdeCpsl)){
+                    gxdeCpsl = "0";
+                }
+                gxdeCpsl = String.valueOf(Integer.valueOf(gxdeCpsl) + Integer.valueOf(cpsl));
                 scCpgxde.setGx_cpsl(gxdeCpsl);
             }
-            /** 查询工序交接数量**/
-            List<Map<String,Object>> jjslList = btoWebMapper.queryProcessHandoverAmount(ddbh,gxbh);
-            if(jjslList != null && jjslList.size() > 0){
-                String gxdeJjsl = String.valueOf(jjslList.get(0).get("jjsl"));
-                scCpgxde.setGx_jjsl(gxdeJjsl);
-            }
+
             logger.info("scScgxde update ddbh {} gxbh {} scCpgxde {}",ddbh,gxbh,scCpgxde);
             UpdateWrapper<ScCpgxde> sccpgxdeUpdateWrapper = new UpdateWrapper<>();
             sccpgxdeUpdateWrapper.eq("DD_DDDH", scCpgxde.getDd_dddh());
-            sccpgxdeUpdateWrapper.eq("CP_CPBH",scCpgxde.getCp_cpbh());
             sccpgxdeUpdateWrapper.eq("GX_BH", scCpgxde.getGx_bh());
             scCpgxdeService.update(scCpgxde,sccpgxdeUpdateWrapper);
+
+            /** 查询工序交接数量**/
+            List<Map<String,Object>> jjslList = btoWebMapper.queryProcessHandoverAmount(ddbh,gxbh);
+            if(jjslList != null && jjslList.size() > 0){
+                String gxdeJjsl = String.valueOf(jjslList.get(0).get("sl"));
+                if(StringUtils.isBlank(gxdeJjsl)){
+                    gxdeJjsl = "0";
+                }
+                gxdeJjsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(gxdeJjsl) + Integer.valueOf(cpsl));
+                ScCpgxde jjScCpgxde = new ScCpgxde();
+                jjScCpgxde.setGx_jjsl(gxdeJjsl);
+                jjScCpgxde.setDd_dddh(ddbh);
+                jjScCpgxde.setGx_bh(gxbh);
+                UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
+                sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
+                sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
+                scCpgxdeService.update(jjScCpgxde,sccpgxdeJJslUpdateWrapper);
+            }
+
+
             return ResultUtil.success(djbh);
         }catch (Exception e){
             logger.error("updateProductionRegistrationOrderInfo ddbh {} error {}",ddbh,e);
