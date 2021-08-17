@@ -463,6 +463,38 @@
             jlb.mx_yy
     </select>
 
+    <select id="queryProcessReasonCount" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT SUM( scjl.mx_sl ) sl,
+               scjl.dd_dddh AS ddbh,
+               scjl.gx_bh AS gxbh,
+               scjl.mx_fclb AS fclb,
+               scjl.mx_yy AS yybh
+        FROM
+            sc_scjlb scjl
+        WHERE
+            1 = 1
+
+        <if test="ddbh != null and ddbh != ''">
+            AND scjl.dd_dddh = #{ddbh}
+        </if>
+        <if test="yybh != null and yybh != ''">
+            AND scjl.mx_yy = #{yybh}
+        </if>
+        <if test="gxbh != null and gxbh != ''">
+            AND jlb.gx_bh = #{gxbh}
+        </if>
+        <if test="fclb != null and fclb != ''">
+            AND jlb.mx_fclb = #{fclb}
+        </if>
+        GROUP BY
+            scjl.dd_dddh,
+            scjl.gx_bh,
+            scjl.mx_fclb,
+            scjl.mx_yy
+
+
+    </select>
+
 
 
 

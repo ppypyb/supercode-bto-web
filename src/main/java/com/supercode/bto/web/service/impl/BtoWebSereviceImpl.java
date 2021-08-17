@@ -705,7 +705,26 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 if(scraps != null && scraps.size() > 0){
                     for(Map<String,String> scrap:scraps){
                         String yy = scrap.get("yy");
-                        String sl = String.valueOf(scrap.get("sl"));
+                        String sl = scrap.get("sl");
+                        if(StringUtils.isNotBlank(sl) && Integer.valueOf(sl) > 0){
+                            List<Map<String,Object>> processReasonCounts = btoWebMapper.queryProcessReasonCount(ddbh,gxbh,yy,fclb);
+                            if(processReasonCounts != null && processReasonCounts.size() > 0){
+                                for(Map<String,Object> processReason:processReasonCounts){
+                                    if(processReason.get("sl") != null){
+                                        String processReasonSl = String.valueOf(processReason.get("sl"));
+                                        if(StringUtils.isNotBlank(processReasonSl) && Integer.valueOf(processReasonSl) > 0){
+                                            int slInt = Integer.valueOf(sl) - Integer.valueOf(processReasonSl);
+                                            if(slInt < 0){
+                                                slInt = 0;
+                                            }
+                                            sl = String.valueOf(slInt);
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            sl = "0";
+                        }
                         ScScjlb scScjlb = new ScScjlb();
                         Calendar calendar = Calendar.getInstance();
                         String jlbh = keySdf.format(calendar.getTime());
