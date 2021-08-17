@@ -707,7 +707,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                         String yy = scrap.get("yy");
                         String sl = scrap.get("sl");
                         if(StringUtils.isNotBlank(sl) && Integer.valueOf(sl) > 0){
-                            List<Map<String,Object>> processReasonCounts = btoWebMapper.queryProcessReasonCount(ddbh,gxbh,yy,fclb);
+                            List<Map<String,Object>> processReasonCounts = btoWebMapper.queryProcessReasonCount(ddbh,rybh,gxbh,yy,fclb);
                             if(processReasonCounts != null && processReasonCounts.size() > 0){
                                 for(Map<String,Object> processReason:processReasonCounts){
                                     if(processReason.get("sl") != null){

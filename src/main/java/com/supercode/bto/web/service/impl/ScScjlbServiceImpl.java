@@ -9,6 +9,8 @@ import com.supercode.bto.web.pojos.restful.RestResult;
 import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
 import com.supercode.bto.web.service.IScScjlbService;
 import com.supercode.bto.web.utils.restful.ResultUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,18 +24,20 @@ import java.util.List;
  */
 @Service
 public class ScScjlbServiceImpl extends ServiceImpl<ScScjlbMapper, ScScjlb> implements IScScjlbService {
+    private Logger logger = LoggerFactory.getLogger(ScScjlbServiceImpl.class);
 
     @Autowired
     ScScjlbMapper scScjlbMapper;
 
     @Override
-    public RestResult insert(ScScjlb scScjlb) {
+    public String insert(ScScjlb scScjlb) {
         try {
             scScjlbMapper.insert(scScjlb);
-            return ResultUtil.success("插入成功 "+scScjlb.getDj_jlbh());
+            return "插入成功 "+scScjlb.getDj_jlbh();
         }catch (Exception e){
-            return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION);
+            logger.error("ScScjlb insert error {}",e);
         }
+        return null;
 
 
     }

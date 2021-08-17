@@ -468,7 +468,8 @@
                scjl.dd_dddh AS ddbh,
                scjl.gx_bh AS gxbh,
                scjl.mx_fclb AS fclb,
-               scjl.mx_yy AS yybh
+               scjl.mx_yy AS yybh,
+               scjl.ry_bh AS rybh
         FROM
             sc_scjlb scjl
         WHERE
@@ -476,6 +477,9 @@
 
         <if test="ddbh != null and ddbh != ''">
             AND scjl.dd_dddh = #{ddbh}
+        </if>
+        <if test="rybh != null and rybh != ''">
+            AND scjl.ry_bh = #{rybh}
         </if>
         <if test="yybh != null and yybh != ''">
             AND scjl.mx_yy = #{yybh}
@@ -490,9 +494,8 @@
             scjl.dd_dddh,
             scjl.gx_bh,
             scjl.mx_fclb,
-            scjl.mx_yy
-
-
+            scjl.mx_yy,
+            scjl.ry_bh
     </select>
 
 

@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface IScScjlbService extends IService<ScScjlb> {
 
-    public RestResult insert(ScScjlb scScjlb);
+    public String insert(ScScjlb scScjlb);
 
     /**
      * @description: 根据登记编号和工序编号查询生产记录信息

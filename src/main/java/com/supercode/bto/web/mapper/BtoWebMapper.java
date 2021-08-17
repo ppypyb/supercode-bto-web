@@ -212,6 +212,7 @@ public interface BtoWebMapper {
                                                      @Param("fclb") String fclb);
 
     List<Map<String,Object>> queryProcessReasonCount(@Param("ddbh") String ddbh,
+                                                     @Param("rybh") String rybh,
                                                      @Param("gxbh") String gxbh,
                                                      @Param("yybh") String yybh,
                                                      @Param("fclb") String fclb);

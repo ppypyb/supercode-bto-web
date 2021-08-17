@@ -38,13 +38,13 @@ public class ScScjlbController {
     @ApiResponses({@ApiResponse(code = 10000, message = "添加成功"),
             @ApiResponse(code = 50001, message = "内部接口调用异常")})
     @RequestMapping(value = "insert" ,method = RequestMethod.POST)
-    public RestResult insert(@RequestBody ScScjlb scScjlb
-                             ){
+    public RestResult insert(@RequestBody ScScjlb scScjlb){
         try {
             Date now = new Date();
             logger.info("insert {}",now.getTime());
             scScjlb.setDj_jlbh(String.valueOf(now.getTime()));
-            return scScjlbService.insert(scScjlb);
+            scScjlbService.insert(scScjlb);
+            return ResultUtil.success();
         }catch (Exception e){
             return ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
         }
