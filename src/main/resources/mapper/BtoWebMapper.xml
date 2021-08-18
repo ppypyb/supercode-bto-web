@@ -40,20 +40,23 @@
                 AND cp.kh_bh = #{khbh}
             </if>
             <if test="htbh != null and htbh != ''">
-                AND scddb.ht_bh LIKE  '%'+#{htbh}+'%'
+                AND scddb.ht_bh LIKE  '%' + #{htbh} + '%'
             </if>
             <if test="ddbh != null and ddbh != ''">
                 AND scddb.dd_dddh = #{ddbh}
             </if>
             <if test="cpmc != null and cpmc != ''">
-                AND cp.cp_mc LIKE  '%'+#{cpmc}+'%'
+                AND cp.cp_mc LIKE  '%' + #{cpmc} + '%'
             </if>
             <if test="startDate != null and startDate != ''">
-                AND DATEDIFF( DAY, #{startDate}, scddb.pc_zdrq ) &gt; 0
+                AND DATEDIFF( DAY, #{startDate}, scddb.dd_jhrq ) &gt; 0
             </if>
             <if test="endDate != null and endDate != ''">
-                AND DATEDIFF( DAY, scddb.pc_zdrq, #{endDate} ) &gt; 0
+                AND DATEDIFF( DAY, scddb.dd_jhrq, #{endDate} ) &gt; 0
             </if>
+
+            ORDER BY
+              jhrq
 
     </select>
 
@@ -165,8 +168,9 @@
 
     <select id="queryJobProcessList" parameterType="java.lang.String" resultType="java.util.Map" >
         SELECT DISTINCT
-            jl.dj_gzdh as gzdh,
-            jl.dj_ch as jjdh,
+            jl.dj_bh as djbh,
+            isnull( jl.dj_gzdh, '' ) AS gzdh,
+            isnull( jl.dj_ch, '' ) AS jjdh,
             CONVERT(varchar(100), jl.dj_scrq, 20) as djrq,
             gx.gx_bh as gxbh,
             gx.gx_mc as gxmc,
@@ -485,10 +489,10 @@
             AND scjl.mx_yy = #{yybh}
         </if>
         <if test="gxbh != null and gxbh != ''">
-            AND jlb.gx_bh = #{gxbh}
+            AND scjl.gx_bh = #{gxbh}
         </if>
         <if test="fclb != null and fclb != ''">
-            AND jlb.mx_fclb = #{fclb}
+            AND scjl.mx_fclb = #{fclb}
         </if>
         GROUP BY
             scjl.dd_dddh,

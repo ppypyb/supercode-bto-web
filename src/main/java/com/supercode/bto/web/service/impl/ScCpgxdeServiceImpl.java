@@ -38,10 +38,20 @@ public class ScCpgxdeServiceImpl extends ServiceImpl<ScCpgxdeMapper, ScCpgxde> i
     }
 
     @Override
-    public List<ScCpgxde> selectByDdbhAndGxbh(String ddbh, String gxbh) {
+    public List<ScCpgxde> selectByDdbhAndGxbh(String ddbh,String cpbh, String gxbh) {
         QueryWrapper<ScCpgxde> wrapper = new QueryWrapper<ScCpgxde>();
         wrapper.eq("DD_DDDH",ddbh);
+        wrapper.eq("CP_CPBH",cpbh);
         wrapper.eq("GX_BH",gxbh);
+        return scCpgxdeMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<ScCpgxde> selectByDdbhAndYl1(String ddbh, String cpbh, String gxbh) {
+        QueryWrapper<ScCpgxde> wrapper = new QueryWrapper<ScCpgxde>();
+        wrapper.eq("DD_DDDH",ddbh);
+        wrapper.eq("CP_CPBH",cpbh);
+        wrapper.eq("YL1",gxbh);
         return scCpgxdeMapper.selectList(wrapper);
     }
 }

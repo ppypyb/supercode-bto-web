@@ -55,7 +55,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
 
     private SimpleDateFormat sdf  =new SimpleDateFormat("yyyy-MM-dd");
     /** 表主键**/
-    private SimpleDateFormat keySdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    private SimpleDateFormat keySdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
     private SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -111,14 +111,6 @@ public class BtoWebSereviceImpl implements IBtoWebService {
         Map<String,Object> resultMap = new HashMap<String,Object>();
         List<Map<String,Object>> orderList = btoWebMapper.queryOrderList(khbh,htbh,ddbh,rybh,cpmc,startDate,endDate);
         Set<String> orderDdbhList = new HashSet<String>();
-        /** 执行中订单**/
-        List<Map<String,Object>> inExecutionList = new ArrayList<Map<String,Object>>();
-        /** 临期订单**/
-        List<Map<String,Object>> adventOrderList = new ArrayList<Map<String,Object>>();
-        /** 逾期订单**/
-        List<Map<String,Object>> overdueOrderList = new ArrayList<Map<String,Object>>();
-        /** 已完成订单**/
-        List<Map<String,Object>> completedList = new ArrayList<Map<String,Object>>();
 
         List<Map<String,Object>> resultOrderList = new ArrayList<Map<String,Object>>();
 
@@ -147,37 +139,53 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 if(orderMap.get("ddzt") != null){
                     orderZt = String.valueOf(orderMap.get("ddzt"));
                 }
-                if(StringUtils.equals(orderZt,"1")){
-                    resultOrderMap.put("status","1");
-                    orderStatus = "1";
-                    if(StringUtils.isNotBlank(orderJhrq)){
-                        try {
-                            Date ddjhrqDate = sdf.parse(orderJhrq);
-                            Date nowDate = new Date();
-                            boolean flag = nowDate.getTime() >= ddjhrqDate.getTime();
-                            if(flag){
-                                /** 当前时间大于计划交货时间称为逾期**/
-                                overdueOrderList.add(orderMap);
-                                resultOrderMap.put("status","3");
-                                orderStatus = "3";
+                /** 执行中订单**/
+                if(StringUtils.equals(status,"1")){
+                    if(StringUtils.equals(orderZt,"1")){
+                        resultOrderMap.put("status","1");
+                        orderStatus = "1";
+                    }
+                }
+                /** 已完成订单**/
+                if(StringUtils.equals(status,"4")){
+                    if(StringUtils.equals(orderZt,"2")){
+                        resultOrderMap.put("status","2");
+                        orderStatus = "2";
+                    }
+                }
+                /** 逾期订单**/
+                if(StringUtils.equals(status,"3")){
+                    if(StringUtils.equals(orderZt,"1")){
+                        if(StringUtils.isNotBlank(orderJhrq)){
+                            try {
+                                Date ddjhrqDate = sdf.parse(orderJhrq);
+                                Date nowDate = new Date();
+                                boolean flag = nowDate.getTime() > ddjhrqDate.getTime();
+                                if(flag){
+                                    /** 当前时间大于计划交货时间称为逾期**/
+                                    resultOrderMap.put("status","3");
+                                    orderStatus = "3";
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
+                        }
+                    }
+
+                }
+                /** 临期订单 **/
+                if(StringUtils.equals(status,"2")){
+                    if(StringUtils.equals(orderZt,"1")){
+                        if(StringUtils.isNotBlank(orderJhrq)){
                             /** 交货日期与当前时间相差7天之内为临期订单**/
                             Long diffDays = getDay(orderJhrq);
                             if(diffDays > 0 && diffDays < 8){
                                 resultOrderMap.put("status","4");
-                                adventOrderList.add(orderMap);
                                 orderStatus = "4";
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
                         }
                     }
-                }
-                /** 已完成订单**/
-                if(StringUtils.equals(orderZt,"2")){
-                    completedList.add(orderMap);
-                    resultOrderMap.put("status","2");
-                    orderStatus = "2";
+
                 }
                 if(StringUtils.isNotBlank(status) ){
                     if(StringUtils.equals(orderStatus,status)){
@@ -198,10 +206,6 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             }
             resultMap.put("ddbhList",orderDdbhList);
             resultMap.put("orderList",resultOrderList);
-//            resultMap.put("inExecutionList",inExecutionList);
-//            resultMap.put("adventList",adventOrderList);
-//            resultMap.put("overdueList",overdueOrderList);
-//            resultMap.put("completedList",completedList);
         }
         return resultMap;
     }
@@ -218,6 +222,8 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             resultMap.put("cpmc",orderMap.get("cpmc"));
             resultMap.put("cpth",orderMap.get("cpth"));
             resultMap.put("cpcz",orderMap.get("cpcz"));
+            resultMap.put("jhrq",orderMap.get("jhrq"));
+            resultMap.put("pcsl",orderMap.get("pcsl"));
             resultMap.put("cptp","default.png");
         }
 
@@ -302,7 +308,10 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                         NumberFormat numberFormat = NumberFormat.getInstance();
                         /** 设置精确到小数点后2位 **/
                         numberFormat.setMaximumFractionDigits(2);
-                        wcjd = numberFormat.format(Float.parseFloat(scwcsl)/ Float.parseFloat(scpcsl)* 100);
+                        if(StringUtils.isNotBlank(scpcsl) && Integer.valueOf(scpcsl) > 0){
+                            wcjd = numberFormat.format(Float.parseFloat(scwcsl)/ Float.parseFloat(scpcsl)* 100);
+                        }
+
                     }
                 }
                 processDetailMap.put("wcjd",wcjd+"%");
@@ -468,21 +477,6 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             if(orderList != null && orderList.size() > 0){
                 for(Map<String,Object> orderMap:orderList){
                     result.putAll(orderMap);
-                    ScJldjb scJldjb = new ScJldjb();
-                    Calendar calendar = Calendar.getInstance();
-                    String djbh = keySdf.format(calendar.getTime());
-                    scJldjb.setDj_bh(djbh);
-                    scJldjb.setDd_dddh(ddbh);
-                    scJldjb.setRy_bh(rybh);
-                    scJldjb.setDj_djr(rybh);
-                    scJldjb.setDj_scrq(calendar.getTime());
-                    String cpbh = String.valueOf(orderMap.get("cpbh"));
-                    scJldjb.setCp_cpbh(cpbh);
-                    String bmbh = String.valueOf(orderMap.get("bmbh"));
-                    scJldjb.setBm_bh(bmbh);
-                    scJldjb.setDj_tjbz("0");
-                    scJldjbService.insert(scJldjb);
-                    result.put("djbh",djbh);
                 }
             }
         }catch (Exception e){
@@ -496,7 +490,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
         try{
 //            List<ScJldjb> scJldjbList = scJldjbService.queryScjlbList(ddbh, rybh, gxbh, gzdh, jjdh);
             List<ScJldjb> scJldjbList = scJldjbService.getByDjbh(djbh);
-            List<ScCpgxde> scCpgxdeList = scCpgxdeService.selectByDdbhAndGxbh(ddbh,gxbh);
+            List<ScCpgxde> scCpgxdeList = scCpgxdeService.selectByDdbhAndGxbh(ddbh,cpbh,gxbh);
             String pcsl = "";
             if(StringUtils.isBlank(zpsl)){
                 zpsl = "0";
@@ -549,69 +543,27 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     scJldjbService.update(scJldjb,scjldjbUpdateWrapper);
                 }
             }
-            /**
-            else{
-                ScJldjb scJldjb = new ScJldjb();
-                Calendar calendar = Calendar.getInstance();
-                djbh = keySdf.format(calendar.getTime());
-                scJldjb.setDj_bh(djbh);
-                scJldjb.setDd_dddh(ddbh);
-                scJldjb.setRy_bh(rybh);
-                scJldjb.setDj_djr(rybh);
-                scJldjb.setDj_scrq(calendar.getTime());
-                scJldjb.setCp_cpbh(cpbh);
-                scJldjb.setBm_bh(bmbh);
-                scJldjb.setGx_bh(gxbh);
-                scJldjb.setDj_ch(jjdh);
-                scJldjb.setDj_gzdh(gzdh);
-
-                if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
-                    scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
-                    pcsl = scCpgxdeList.get(0).getGx_pcsl();
-                }
-                if(StringUtils.isNotBlank(zpsl) && !StringUtils.equals(zpsl,"0")){
-                    scJldjb.setDj_zpsl(zpsl);
-                }else{
-                    scJldjb.setDj_zpsl("0");
-                }
-                if(StringUtils.isNotBlank(fpsl) && !StringUtils.equals(fpsl,"0")){
-                    scJldjb.setDj_fpsl(fpsl);
-                }else{
-                    scJldjb.setDj_fpsl("0");
-                }
-                if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
-                    scJldjb.setDj_cpsl(cpsl);
-                }else{
-                    scJldjb.setDj_fpsl("0");
-                }
-                if(!StringUtils.equals(wcsl,"0")){
-                    scJldjb.setDj_wcsl(wcsl);
-                }else{
-                    scJldjb.setDj_wcsl("0");
-                }
-                if(StringUtils.isNotBlank(pcsl)){
-                    String wclsl = String.valueOf(Integer.valueOf(pcsl) - Integer.valueOf(wcsl));
-                    scJldjb.setDj_wclsl(wclsl);
-                }else{
-                    scJldjb.setDj_wclsl("0");
-                }
-                scJldjb.setDj_tjbz("0");
-                scJldjbService.insert(scJldjb);
-            } ***/
 
             List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndGxbh(djbh,gxbh);
             if(scScjlbList != null && scScjlbList.size() > 0){
                 for(ScScjlb scScjlb : scScjlbList){
-                    scScjlb.setMx_tjbz("1");
-                    scScjlb.setDj_bh(djbh);
-                    UpdateWrapper<ScScjlb> scScjlbUpdateWrapper = new UpdateWrapper<>();
-                    scScjlbUpdateWrapper.eq("DJ_JLBH", scScjlb.getDj_jlbh());
-                    scScjlbService.update(scScjlb,scScjlbUpdateWrapper);
-                    logger.info("update scscjlb jlbh {}",scScjlb.getDj_jlbh());
+                    ScScjlb updateScjlb = new ScScjlb();
+                    updateScjlb.setMx_sl(scScjlb.getMx_sl());
+                    updateScjlb.setMx_tjbz("1");
+                    UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
+                    scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
+                    scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
                 }
+
             }
             /** 更新工序定额表**/
             ScCpgxde scCpgxde = scCpgxdeList.get(0);
+            ScCpgxde updateSccpgxde = new ScCpgxde();
+            updateSccpgxde.setGx_pcsl(scCpgxde.getGx_pcsl());
+            updateSccpgxde.setGx_tjsl(scCpgxde.getGx_tjsl());
+            updateSccpgxde.setGx_sygs(scCpgxde.getGx_sygs());
+            updateSccpgxde.setGx_wclsl(scCpgxde.getGx_wclsl());
+            updateSccpgxde.setGx_jjsl(scCpgxde.getGx_jjsl());
 
             /** 查询工序完成数量**/
             List<Map<String,Object>> wcslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"0");
@@ -621,7 +573,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     gxdeWcsl = "0";
                 }
                 gxdeWcsl = String.valueOf(Integer.valueOf(gxdeWcsl) + Integer.valueOf(wcsl));
-                scCpgxde.setGx_wcsl(gxdeWcsl);
+                updateSccpgxde.setGx_wcsl(gxdeWcsl);
             }
             /** 查询工序废品数量**/
             List<Map<String,Object>> fpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"2");
@@ -631,7 +583,7 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     gxdeFpsl = "0";
                 }
                 gxdeFpsl = String.valueOf(Integer.valueOf(gxdeFpsl) + Integer.valueOf(fpsl));
-                scCpgxde.setGx_fpsl(gxdeFpsl);
+                updateSccpgxde.setGx_fpsl(gxdeFpsl);
             }
             /** 查询工序废品数量**/
             List<Map<String,Object>> cpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"1");
@@ -641,14 +593,15 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     gxdeCpsl = "0";
                 }
                 gxdeCpsl = String.valueOf(Integer.valueOf(gxdeCpsl) + Integer.valueOf(cpsl));
-                scCpgxde.setGx_cpsl(gxdeCpsl);
+                updateSccpgxde.setGx_cpsl(gxdeCpsl);
             }
 
             logger.info("scScgxde update ddbh {} gxbh {} scCpgxde {}",ddbh,gxbh,scCpgxde);
             UpdateWrapper<ScCpgxde> sccpgxdeUpdateWrapper = new UpdateWrapper<>();
-            sccpgxdeUpdateWrapper.eq("DD_DDDH", scCpgxde.getDd_dddh());
-            sccpgxdeUpdateWrapper.eq("GX_BH", scCpgxde.getGx_bh());
-            scCpgxdeService.update(scCpgxde,sccpgxdeUpdateWrapper);
+            sccpgxdeUpdateWrapper.eq("DD_DDDH", ddbh);
+            sccpgxdeUpdateWrapper.eq("GX_BH", gxbh);
+            sccpgxdeUpdateWrapper.eq("CP_CPBH", cpbh);
+            scCpgxdeService.update(updateSccpgxde,sccpgxdeUpdateWrapper);
 
             /** 查询工序交接数量**/
             List<Map<String,Object>> jjslList = btoWebMapper.queryProcessHandoverAmount(ddbh,gxbh);
@@ -658,14 +611,18 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                     gxdeJjsl = "0";
                 }
                 gxdeJjsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(gxdeJjsl) + Integer.valueOf(cpsl));
-                ScCpgxde jjScCpgxde = new ScCpgxde();
-                jjScCpgxde.setGx_jjsl(gxdeJjsl);
-                jjScCpgxde.setDd_dddh(ddbh);
-                jjScCpgxde.setGx_bh(gxbh);
-                UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
-                sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
-                sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
-                scCpgxdeService.update(jjScCpgxde,sccpgxdeJJslUpdateWrapper);
+                List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndYl1(ddbh,cpbh,gxbh);
+                if(scCpgxdes != null && scCpgxdes.size() > 0){
+                    for(ScCpgxde jjScCpgxde:scCpgxdes){
+                        jjScCpgxde.setGx_jjsl(gxdeJjsl);
+                        UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
+                        sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
+                        sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
+                        sccpgxdeJJslUpdateWrapper.eq("CP_CPBH",cpbh);
+                        scCpgxdeService.update(jjScCpgxde,sccpgxdeJJslUpdateWrapper);
+                    }
+                }
+
             }
 
 
@@ -700,47 +657,42 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             String cpbh = scJldjb.getCp_cpbh();
             String bmbh = scJldjb.getBm_bh();
             String rybh = scJldjb.getRy_bh();
-            List<Map<String,String>> scraps = (List<Map<String, String>>) params.get("scraps");
+            List<Map<String,Object>> scraps = (List<Map<String, Object>>) params.get("scraps");
             try{
                 if(scraps != null && scraps.size() > 0){
-                    for(Map<String,String> scrap:scraps){
-                        String yy = scrap.get("yy");
-                        String sl = scrap.get("sl");
-                        if(StringUtils.isNotBlank(sl) && Integer.valueOf(sl) > 0){
-                            List<Map<String,Object>> processReasonCounts = btoWebMapper.queryProcessReasonCount(ddbh,rybh,gxbh,yy,fclb);
-                            if(processReasonCounts != null && processReasonCounts.size() > 0){
-                                for(Map<String,Object> processReason:processReasonCounts){
-                                    if(processReason.get("sl") != null){
-                                        String processReasonSl = String.valueOf(processReason.get("sl"));
-                                        if(StringUtils.isNotBlank(processReasonSl) && Integer.valueOf(processReasonSl) > 0){
-                                            int slInt = Integer.valueOf(sl) - Integer.valueOf(processReasonSl);
-                                            if(slInt < 0){
-                                                slInt = 0;
-                                            }
-                                            sl = String.valueOf(slInt);
-                                        }
-                                    }
-                                }
+                    for(Map<String,Object> scrap:scraps){
+                        String yy = String.valueOf(scrap.get("yy"));
+                        String sl = String.valueOf(scrap.get("sl"));
+                        List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndYybh(djbh,fclb,yy);
+                        if(scScjlbList !=null && scScjlbList.size() > 0){
+                            for(ScScjlb scScjlb:scScjlbList){
+                                ScScjlb updateScjlb = new ScScjlb();
+                                updateScjlb.setMx_sl(sl);
+                                UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
+                                scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
+                                scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
+
                             }
                         }else{
-                            sl = "0";
+                            ScScjlb scScjlb = new ScScjlb();
+                            Calendar calendar = Calendar.getInstance();
+                            String jlbh = keySdf.format(calendar.getTime());
+                            scScjlb.setDj_jlbh(jlbh);
+                            scScjlb.setDj_scrq(calendar.getTime());
+                            scScjlb.setDj_bh(djbh);
+                            scScjlb.setDd_dddh(ddbh);
+                            scScjlb.setCp_cpbh(cpbh);
+                            scScjlb.setBm_bh(bmbh);
+                            scScjlb.setGx_bh(gxbh);
+                            scScjlb.setRy_bh(rybh);
+                            scScjlb.setMx_fclb(fclb);
+                            scScjlb.setMx_yy(yy);
+                            scScjlb.setMx_sl(sl);
+                            scScjlb.setMx_tjbz("0");
+                            scScjlbService.insert(scScjlb);
                         }
-                        ScScjlb scScjlb = new ScScjlb();
-                        Calendar calendar = Calendar.getInstance();
-                        String jlbh = keySdf.format(calendar.getTime());
-                        scScjlb.setDj_jlbh(jlbh);
-                        scScjlb.setDj_scrq(calendar.getTime());
-                        scScjlb.setDj_bh(djbh);
-                        scScjlb.setDd_dddh(ddbh);
-                        scScjlb.setCp_cpbh(cpbh);
-                        scScjlb.setBm_bh(bmbh);
-                        scScjlb.setGx_bh(gxbh);
-                        scScjlb.setRy_bh(rybh);
-                        scScjlb.setMx_fclb(fclb);
-                        scScjlb.setMx_yy(yy);
-                        scScjlb.setMx_sl(sl);
-                        scScjlb.setMx_tjbz("0");
-                        scScjlbService.insert(scScjlb);
+
+
                     }
                     return ResultUtil.success();
                 }
@@ -777,13 +729,53 @@ public class BtoWebSereviceImpl implements IBtoWebService {
 
     @Override
     public List<Map<String, Object>> queryJobProcessList(String ddbh, String rybh, String gxbh, String gzdh, String jjdh) {
-        List<Map<String,Object>> jobProcessList = new ArrayList<Map<String,Object>>();
+        List<Map<String,Object>> resultList = new ArrayList<Map<String,Object>>();
         try {
-            jobProcessList = btoWebMapper.queryJobProcessList(ddbh, rybh, gxbh,gzdh,jjdh);
+            List<Map<String,Object>> jobProcessList = btoWebMapper.queryJobProcessList(ddbh, rybh, gxbh,gzdh,jjdh);
+            if(jobProcessList == null || jobProcessList.size() ==0){
+                List<Map<String,Object>> orderList = btoWebMapper.queryProductionRegistrationOrderInfo(ddbh,rybh);
+                if(orderList != null && orderList.size() > 0){
+                    for(Map<String,Object> orderMap:orderList){
+                        Map<String,Object> result = new ConcurrentHashMap<String,Object>();
+                        ScJldjb scJldjb = new ScJldjb();
+                        Calendar calendar = Calendar.getInstance();
+                        String djbh = keySdf.format(calendar.getTime());
+                        scJldjb.setDj_bh(djbh);
+                        scJldjb.setDd_dddh(ddbh);
+                        scJldjb.setRy_bh(rybh);
+                        scJldjb.setDj_djr(rybh);
+                        scJldjb.setDj_scrq(calendar.getTime());
+                        String cpbh = String.valueOf(orderMap.get("cpbh"));
+                        scJldjb.setCp_cpbh(cpbh);
+                        String bmbh = String.valueOf(orderMap.get("bmbh"));
+                        scJldjb.setBm_bh(bmbh);
+                        scJldjb.setDj_tjbz("0");
+                        scJldjb.setGx_bh(gxbh);
+                        scJldjb.setDj_gzdh(gzdh);
+                        scJldjb.setDj_ch(jjdh);
+                        scJldjb.setDj_zpsl("0");
+                        scJldjb.setDj_cpsl("0");
+                        scJldjb.setDj_fpsl("0");
+                        scJldjbService.insert(scJldjb);
+                        result.put("djbh",djbh);
+                        result.put("gzdh",gzdh);
+                        result.put("gxbh",gxbh);
+                        result.put("jjdh",jjdh);
+                        result.put("rybh",rybh);
+                        result.put("zpsl","0");
+                        result.put("fpsl","0");
+                        result.put("cpsl","0");
+                        result.put("djrq",sdf.format(new Date()));
+                        resultList.add(result);
+                    }
+                }
+            }else{
+                resultList.add(jobProcessList.get(0));
+            }
         }catch (Exception e){
             logger.error("queryJobProcessList error {}",e);
         }
-        return jobProcessList;
+        return resultList;
     }
 
     /*

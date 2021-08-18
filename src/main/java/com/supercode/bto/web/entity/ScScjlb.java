@@ -52,6 +52,8 @@ public class ScScjlb extends Model<ScScjlb> {
 
     private String cp_dz;
 
+    private String gx_jjbz;
+
     public String getDj_jlbh() {
         return dj_jlbh;
     }
@@ -178,5 +180,13 @@ public class ScScjlb extends Model<ScScjlb> {
 
     public void setCp_dz(String cp_dz) {
         this.cp_dz = cp_dz;
+    }
+
+    public String getGx_jjbz() {
+        return gx_jjbz;
+    }
+
+    public void setGx_jjbz(String gx_jjbz) {
+        this.gx_jjbz = gx_jjbz;
     }
 }

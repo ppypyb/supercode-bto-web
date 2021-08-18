@@ -50,4 +50,13 @@ public class ScScjlbServiceImpl extends ServiceImpl<ScScjlbMapper, ScScjlb> impl
         wrapper.eq("MX_TJBZ","0");
         return scScjlbMapper.selectList(wrapper);
     }
+
+    @Override
+    public List<ScScjlb> selectByDjbhAndYybh(String djbh, String fclb, String yybh) {
+        QueryWrapper<ScScjlb> wrapper = new QueryWrapper<ScScjlb>();
+        wrapper.eq("DJ_BH",djbh);
+        wrapper.eq("MX_FCLB",fclb);
+        wrapper.eq("MX_YY",yybh);
+        return scScjlbMapper.selectList(wrapper);
+    }
 }

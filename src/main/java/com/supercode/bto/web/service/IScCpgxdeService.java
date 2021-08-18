@@ -24,6 +24,15 @@ public interface IScCpgxdeService extends IService<ScCpgxde> {
      * @date: 2021/7/25 15:35
      * @return:
      */
-    public List<ScCpgxde> selectByDdbhAndGxbh(String ddbh, String gxbh);
+    public List<ScCpgxde> selectByDdbhAndGxbh(String ddbh,String cpbh, String gxbh);
+
+    /**
+     * @description: 根据订单编号、产品编号、yl1查找工序定额信息
+     * @author pengyongbo
+     * @param: [ddbh, cpbh, gxbh]
+     * @date: 2021/8/19 3:56
+     * @return:
+     */
+    public List<ScCpgxde> selectByDdbhAndYl1(String ddbh,String cpbh, String gxbh);
 
 }

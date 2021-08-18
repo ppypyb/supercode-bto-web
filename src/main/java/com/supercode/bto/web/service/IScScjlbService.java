@@ -25,4 +25,13 @@ public interface IScScjlbService extends IService<ScScjlb> {
      */
     List<ScScjlb> selectByDjbhAndGxbh(String djbh,String gxbh);
 
+    /**
+     * @description: 根据登记编号，废次品类别，原因编号查找生产记录信息
+     * @author pengyongbo
+     * @param: [djbh, fclb, yybh]
+     * @date: 2021/8/19 1:48
+     * @return:
+     */
+    List<ScScjlb> selectByDjbhAndYybh(String djbh,String fclb,String yybh);
+
 }

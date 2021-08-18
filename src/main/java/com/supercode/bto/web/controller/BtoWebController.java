@@ -692,8 +692,9 @@ public class BtoWebController {
         try {
             logger.info("cancelProductionRegistration djbh  {} ddbh {} gxbh {} ",djbh,ddbh,gxbh);
 
-            return btoWebService.cancelProductionRegistration(djbh,ddbh,gxbh);
+//            return btoWebService.cancelProductionRegistration(djbh,ddbh,gxbh);
 
+            return ResultUtil.success("取消登记成功");
         } catch (Exception e) {
             logger.error("queryScrapReasonList {}",e);
             return   ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
@@ -727,11 +728,12 @@ public class BtoWebController {
     }
 
 
-    @UserLoginToken
     @RequestMapping(value = "check",method = RequestMethod.GET)
-    public String healthCheck()
+    public RestResult healthCheck()
     {
-        return "btoweb service is run ok!";
+        Map<String,Object> result = new HashMap<>();
+        result.put("lines","lines");
+        return ResultUtil.success(result);
     }
 
 
