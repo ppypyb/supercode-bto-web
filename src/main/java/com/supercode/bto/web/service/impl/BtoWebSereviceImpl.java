@@ -3,6 +3,7 @@ package com.supercode.bto.web.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.supercode.bto.web.common.SystemConstants;
 import com.supercode.bto.web.entity.*;
 import com.supercode.bto.web.mapper.BtoWebMapper;
 import com.supercode.bto.web.pojos.restful.RestResult;
@@ -130,6 +131,8 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                         cptp = "default.png";
                     }
                 }
+
+                cptp = "http://"+ SystemConstants.serviceInternetIp+":"+SystemConstants.serviceInternetPort+SystemConstants.serviceContextPath+"/images/"+cptp;
                 resultOrderMap.put("cptp",cptp);
 
 
@@ -224,7 +227,15 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             resultMap.put("cpcz",orderMap.get("cpcz"));
             resultMap.put("jhrq",orderMap.get("jhrq"));
             resultMap.put("pcsl",orderMap.get("pcsl"));
-            resultMap.put("cptp","default.png");
+            String cptp = "";
+            if(orderMap.get("cptp") != null){
+                cptp = String.valueOf(orderMap.get("cptp"));
+                if(!cptp.endsWith("jpg") && !cptp.endsWith("png")){
+                    cptp = "default.png";
+                }
+            }
+            cptp = "http://"+ SystemConstants.serviceInternetIp+":"+SystemConstants.serviceInternetPort+"/"+SystemConstants.serviceContextPath+"/images/"+cptp;
+            resultMap.put("cptp",cptp);
         }
 
         List<RzBmxxb> rzBmxxbList = rzBmxxbService.selectByBmfl("2");
@@ -326,7 +337,15 @@ public class BtoWebSereviceImpl implements IBtoWebService {
         List<Map<String,Object>> orderList = btoWebMapper.queryOrderRecordInfo(ddbh,rybh);
         if(orderList != null && orderList.size() > 0){
             result.putAll(orderList.get(0));
-            result.put("cptp","default.png");
+            String cptp = "";
+            if(orderList.get(0).get("cptp") != null){
+                cptp = String.valueOf(orderList.get(0).get("cptp"));
+                if(!cptp.endsWith("jpg") && !cptp.endsWith("png")){
+                    cptp = "default.png";
+                }
+            }
+            cptp = "http://"+ SystemConstants.serviceInternetIp+":"+SystemConstants.serviceInternetPort+"/"+SystemConstants.serviceContextPath+"/images/"+cptp;
+            result.put("cptp",cptp);
         }
         List<Map<String,Object>> orderProcessList = btoWebMapper.queryOrderProcessList(ddbh,rybh);
         String gxbh = "";

@@ -175,6 +175,16 @@ public interface IBtoWebService {
      */
     RestResult cancelProductionRegistration(String djbh,String ddbh,String gxbh);
 
+    /**
+     * @description: 查询岗位工序
+     * @author pengyongbo
+     * @param: [ddbh, rybh, gxbh, gzdh, jjdh]
+     * @date: 2021/8/19 10:48
+     * @return:
+     */
     List<Map<String,Object>> queryJobProcessList(String ddbh,String rybh,String gxbh,String gzdh,String jjdh);
+
+
+
 
 }
