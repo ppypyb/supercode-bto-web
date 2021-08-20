@@ -10,6 +10,7 @@ import com.supercode.bto.web.pojos.restful.RestResult;
 import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
 import com.supercode.bto.web.service.IScCpgxdeService;
 import com.supercode.bto.web.utils.restful.ResultUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,18 +41,31 @@ public class ScCpgxdeServiceImpl extends ServiceImpl<ScCpgxdeMapper, ScCpgxde> i
     @Override
     public List<ScCpgxde> selectByDdbhAndGxbh(String ddbh,String cpbh, String gxbh) {
         QueryWrapper<ScCpgxde> wrapper = new QueryWrapper<ScCpgxde>();
-        wrapper.eq("DD_DDDH",ddbh);
-        wrapper.eq("CP_CPBH",cpbh);
-        wrapper.eq("GX_BH",gxbh);
+        if(StringUtils.isNotBlank(ddbh)){
+            wrapper.eq("DD_DDDH",ddbh);
+        }
+        if(StringUtils.isNotBlank(cpbh)){
+            wrapper.eq("CP_CPBH",cpbh);
+        }
+        if(StringUtils.isNotBlank(gxbh)){
+            wrapper.eq("GX_BH",gxbh);
+        }
         return scCpgxdeMapper.selectList(wrapper);
     }
 
     @Override
     public List<ScCpgxde> selectByDdbhAndYl1(String ddbh, String cpbh, String gxbh) {
         QueryWrapper<ScCpgxde> wrapper = new QueryWrapper<ScCpgxde>();
-        wrapper.eq("DD_DDDH",ddbh);
-        wrapper.eq("CP_CPBH",cpbh);
-        wrapper.eq("YL1",gxbh);
+        if(StringUtils.isNotBlank(ddbh)){
+            wrapper.eq("DD_DDDH",ddbh);
+        }
+        if(StringUtils.isNotBlank(cpbh)){
+            wrapper.eq("CP_CPBH",cpbh);
+        }
+        if(StringUtils.isNotBlank(gxbh)){
+            wrapper.eq("YL1",gxbh);
+        }
+
         return scCpgxdeMapper.selectList(wrapper);
     }
 }

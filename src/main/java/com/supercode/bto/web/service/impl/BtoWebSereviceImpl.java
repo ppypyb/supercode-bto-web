@@ -507,7 +507,6 @@ public class BtoWebSereviceImpl implements IBtoWebService {
     @Override
     public RestResult updateProductionRegistrationOrderInfo(String djbh,String ddbh,String cpbh,String rybh,String bmbh, String gxbh, String gzdh, String jjdh, String zpsl, String fpsl, String cpsl) {
         try{
-//            List<ScJldjb> scJldjbList = scJldjbService.queryScjlbList(ddbh, rybh, gxbh, gzdh, jjdh);
             List<ScJldjb> scJldjbList = scJldjbService.getByDjbh(djbh);
             List<ScCpgxde> scCpgxdeList = scCpgxdeService.selectByDdbhAndGxbh(ddbh,cpbh,gxbh);
             String pcsl = "";
@@ -521,143 +520,165 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 cpsl = "0";
             }
             String wcsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(fpsl) + Integer.valueOf(cpsl));
-            if(scJldjbList != null && scJldjbList.size() > 0){
-                for(ScJldjb scJldjb : scJldjbList){
-                    scJldjb.setDd_dddh(ddbh);
-                    scJldjb.setCp_cpbh(cpbh);
-                    scJldjb.setBm_bh(bmbh);
-                    scJldjb.setGx_bh(gxbh);
-                    scJldjb.setRy_bh(rybh);
-                    scJldjb.setDj_djr(rybh);
-                    scJldjb.setDj_gzdh(gzdh);
-                    scJldjb.setDj_ch(jjdh);
-                    if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
-                        scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
-                        pcsl = scCpgxdeList.get(0).getGx_pcsl();
-                    }
-                    if(StringUtils.isNotBlank(zpsl) && !StringUtils.equals(zpsl,"0")){
-                        scJldjb.setDj_zpsl(zpsl);
-                    }
-                    if(StringUtils.isNotBlank(fpsl) && !StringUtils.equals(fpsl,"0")){
-                        scJldjb.setDj_fpsl(fpsl);
-                    }
-                    if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
-                        scJldjb.setDj_cpsl(cpsl);
-                    }
+            if(StringUtils.equals(wcsl,"0")){
+                logger.error("ddbh {} gxbh {} error {}",ddbh,gxbh,"请输入正品、次品、废品数量！");
+                return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION,"请输入正品、次品、废品数量！");
+            }
+            if(scCpgxdeList != null && scCpgxdeList.size() > 0){
+                ScCpgxde scCpgxde = scCpgxdeList.get(0);
+                String gxdepcsl = scCpgxde.getGx_pcsl();
+                String gxdewcsl = scCpgxde.getGx_wcsl();
+                if(StringUtils.isNotBlank(gxdepcsl) && StringUtils.isNotBlank(gxdewcsl)){
+                    if(Integer.valueOf(gxdepcsl) - Integer.valueOf(gxdewcsl) > Integer.valueOf(wcsl)){
+                        if(scJldjbList != null && scJldjbList.size() > 0){
+                            for(ScJldjb scJldjb : scJldjbList){
+                                scJldjb.setDd_dddh(ddbh);
+                                scJldjb.setCp_cpbh(cpbh);
+                                scJldjb.setBm_bh(bmbh);
+                                scJldjb.setGx_bh(gxbh);
+                                scJldjb.setRy_bh(rybh);
+                                scJldjb.setDj_djr(rybh);
+                                scJldjb.setDj_gzdh(gzdh);
+                                scJldjb.setDj_ch(jjdh);
+                                if(scCpgxdeList != null && scCpgxdeList.size() > 0) {
+                                    scJldjb.setGx_bmxh(scCpgxdeList.get(0).getGx_bmxh());
+                                    pcsl = scCpgxdeList.get(0).getGx_pcsl();
+                                }
+                                if(StringUtils.isNotBlank(zpsl) && !StringUtils.equals(zpsl,"0")){
+                                    scJldjb.setDj_zpsl(zpsl);
+                                }
+                                if(StringUtils.isNotBlank(fpsl) && !StringUtils.equals(fpsl,"0")){
+                                    scJldjb.setDj_fpsl(fpsl);
+                                }
+                                if(StringUtils.isNotBlank(cpsl) && !StringUtils.equals(cpsl,"0")){
+                                    scJldjb.setDj_cpsl(cpsl);
+                                }
 
-                    if(!StringUtils.equals(wcsl,"0")){
-                        scJldjb.setDj_wcsl(wcsl);
+                                if(!StringUtils.equals(wcsl,"0")){
+                                    scJldjb.setDj_wcsl(wcsl);
+                                }
+                                if(StringUtils.isNotBlank(pcsl)){
+                                    String wclsl = String.valueOf(Integer.valueOf(pcsl) - Integer.valueOf(wcsl));
+                                    scJldjb.setDj_wclsl(wclsl);
+                                }
+                                scJldjb.setDj_tjbz("0");
+                                UpdateWrapper<ScJldjb> scjldjbUpdateWrapper = new UpdateWrapper<>();
+                                scjldjbUpdateWrapper.eq("DJ_BH",djbh);
+                                scJldjbService.update(scJldjb,scjldjbUpdateWrapper);
+                            }
+                        }
+
+                        List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndGxbh(djbh,gxbh);
+                        if(scScjlbList != null && scScjlbList.size() > 0){
+                            for(ScScjlb scScjlb : scScjlbList){
+                                String tjbz = scScjlb.getMx_tjbz();
+                                if(StringUtils.isNotBlank(tjbz) && !StringUtils.equals(tjbz,"1")){
+                                    ScScjlb updateScjlb = new ScScjlb();
+                                    updateScjlb.setMx_sl(scScjlb.getMx_sl());
+                                    updateScjlb.setMx_tjbz("1");
+                                    UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
+                                    scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
+                                    scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
+                                }
+                            }
+
+                        }
+                        /** 更新工序定额表**/
+                        ScCpgxde updateSccpgxde = new ScCpgxde();
+                        updateSccpgxde.setGx_pcsl(scCpgxde.getGx_pcsl());
+                        updateSccpgxde.setGx_tjsl(scCpgxde.getGx_tjsl());
+                        updateSccpgxde.setGx_sygs(scCpgxde.getGx_sygs());
+                        updateSccpgxde.setGx_wclsl(scCpgxde.getGx_wclsl());
+                        updateSccpgxde.setGx_jjsl(scCpgxde.getGx_jjsl());
+
+                        /** 查询工序完成数量**/
+                        List<Map<String,Object>> wcslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"0");
+                        if(wcslList != null && wcslList.size() > 0){
+                            String gxdeWcsl = String.valueOf(wcslList.get(0).get("sl"));
+                            if(StringUtils.isBlank(gxdeWcsl)){
+                                gxdeWcsl = "0";
+                            }
+                            gxdeWcsl = String.valueOf(Integer.valueOf(gxdeWcsl) + Integer.valueOf(wcsl));
+                            updateSccpgxde.setGx_wcsl(gxdeWcsl);
+                        }
+                        /** 查询工序废品数量**/
+                        List<Map<String,Object>> fpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"2");
+                        if(fpslList != null && fpslList.size() > 0){
+                            String gxdeFpsl = String.valueOf(fpslList.get(0).get("sl"));
+                            if(StringUtils.isBlank(gxdeFpsl)){
+                                gxdeFpsl = "0";
+                            }
+                            gxdeFpsl = String.valueOf(Integer.valueOf(gxdeFpsl) + Integer.valueOf(fpsl));
+                            updateSccpgxde.setGx_fpsl(gxdeFpsl);
+                        }
+                        /** 查询工序废品数量**/
+                        List<Map<String,Object>> cpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"1");
+                        if(cpslList != null && cpslList.size() > 0){
+                            String gxdeCpsl = String.valueOf(cpslList.get(0).get("sl"));
+                            if(StringUtils.isBlank(gxdeCpsl)){
+                                gxdeCpsl = "0";
+                            }
+                            gxdeCpsl = String.valueOf(Integer.valueOf(gxdeCpsl) + Integer.valueOf(cpsl));
+                            updateSccpgxde.setGx_cpsl(gxdeCpsl);
+                        }
+
+                        logger.info("scScgxde update ddbh {} gxbh {} scCpgxde {}",ddbh,gxbh,scCpgxde);
+                        UpdateWrapper<ScCpgxde> sccpgxdeUpdateWrapper = new UpdateWrapper<>();
+                        sccpgxdeUpdateWrapper.eq("DD_DDDH", ddbh);
+                        sccpgxdeUpdateWrapper.eq("GX_BH", gxbh);
+                        sccpgxdeUpdateWrapper.eq("CP_CPBH", cpbh);
+                        scCpgxdeService.update(updateSccpgxde,sccpgxdeUpdateWrapper);
+
+                        /** 查询工序交接数量**/
+                        List<Map<String,Object>> jjslList = btoWebMapper.queryProcessHandoverAmount(ddbh,gxbh);
+                        if(jjslList != null && jjslList.size() > 0){
+                            String gxdeJjsl = String.valueOf(jjslList.get(0).get("sl"));
+                            if(StringUtils.isBlank(gxdeJjsl)){
+                                gxdeJjsl = "0";
+                            }
+                            gxdeJjsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(gxdeJjsl) + Integer.valueOf(cpsl));
+                            List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndYl1(ddbh,cpbh,gxbh);
+                            if(scCpgxdes != null && scCpgxdes.size() > 0){
+                                for(ScCpgxde jjScCpgxde:scCpgxdes){
+                                    ScCpgxde updateScjjCpgxde = new ScCpgxde();
+                                    updateScjjCpgxde.setGx_pcsl(jjScCpgxde.getGx_pcsl());
+                                    updateScjjCpgxde.setGx_tjsl(jjScCpgxde.getGx_tjsl());
+                                    updateScjjCpgxde.setGx_sygs(jjScCpgxde.getGx_sygs());
+                                    updateScjjCpgxde.setGx_wclsl(jjScCpgxde.getGx_wclsl());
+                                    updateScjjCpgxde.setGx_jjsl(jjScCpgxde.getGx_jjsl());
+                                    updateScjjCpgxde.setGx_jjsl(gxdeJjsl);
+                                    updateScjjCpgxde.setGx_wcsl(jjScCpgxde.getGx_wcsl());
+                                    updateScjjCpgxde.setGx_cpsl(jjScCpgxde.getGx_cpsl());
+                                    updateScjjCpgxde.setGx_fpsl(jjScCpgxde.getGx_fpsl());
+                                    UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
+                                    sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
+                                    sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
+                                    sccpgxdeJJslUpdateWrapper.eq("CP_CPBH",cpbh);
+                                    scCpgxdeService.update(updateScjjCpgxde,sccpgxdeJJslUpdateWrapper);
+                                }
+                            }
+
+                        }
+                        return ResultUtil.success(djbh);
                     }else{
-                        scJldjb.setDj_wcsl("0");
+                        String errorInfo = "登记数量："+wcsl+"超出该工序排产数量："+gxdepcsl+"完成数量："+gxdewcsl;
+                        logger.error("ddbh {} gxbh {} error {}",ddbh,gxbh,errorInfo);
+                        return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION,errorInfo);
                     }
-                    if(StringUtils.isNotBlank(pcsl)){
-                        String wclsl = String.valueOf(Integer.valueOf(pcsl) - Integer.valueOf(wcsl));
-                        scJldjb.setDj_wclsl(wclsl);
-                    }else{
-                        scJldjb.setDj_wclsl("0");
-                    }
-                    scJldjb.setDj_tjbz("0");
-                    UpdateWrapper<ScJldjb> scjldjbUpdateWrapper = new UpdateWrapper<>();
-                    scjldjbUpdateWrapper.eq("DJ_BH",djbh);
-                    scJldjbService.update(scJldjb,scjldjbUpdateWrapper);
-                }
-            }
 
-            List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndGxbh(djbh,gxbh);
-            if(scScjlbList != null && scScjlbList.size() > 0){
-                for(ScScjlb scScjlb : scScjlbList){
-                    String tjbz = scScjlb.getMx_tjbz();
-                    if(StringUtils.isNotBlank(tjbz) && !StringUtils.equals(tjbz,"1")){
-                        ScScjlb updateScjlb = new ScScjlb();
-                        updateScjlb.setMx_sl(scScjlb.getMx_sl());
-                        updateScjlb.setMx_tjbz("1");
-                        UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
-                        scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
-                        scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
-                    }
+                }else{
+                    logger.error("ddbh {} gxbh {} 工序定额完成数量 {} 工序定额排产数量 {}",ddbh,gxbh,gxdewcsl,gxdepcsl);
+
+                    return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION,"工序定额排产数量或者完成数量为空！");
                 }
 
-            }
-            /** 更新工序定额表**/
-            ScCpgxde scCpgxde = scCpgxdeList.get(0);
-            ScCpgxde updateSccpgxde = new ScCpgxde();
-            updateSccpgxde.setGx_pcsl(scCpgxde.getGx_pcsl());
-            updateSccpgxde.setGx_tjsl(scCpgxde.getGx_tjsl());
-            updateSccpgxde.setGx_sygs(scCpgxde.getGx_sygs());
-            updateSccpgxde.setGx_wclsl(scCpgxde.getGx_wclsl());
-            updateSccpgxde.setGx_jjsl(scCpgxde.getGx_jjsl());
-
-            /** 查询工序完成数量**/
-            List<Map<String,Object>> wcslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"0");
-            if(wcslList != null && wcslList.size() > 0){
-                String gxdeWcsl = String.valueOf(wcslList.get(0).get("sl"));
-                if(StringUtils.isBlank(gxdeWcsl)){
-                    gxdeWcsl = "0";
-                }
-                gxdeWcsl = String.valueOf(Integer.valueOf(gxdeWcsl) + Integer.valueOf(wcsl));
-                updateSccpgxde.setGx_wcsl(gxdeWcsl);
-            }
-            /** 查询工序废品数量**/
-            List<Map<String,Object>> fpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"2");
-            if(fpslList != null && fpslList.size() > 0){
-                String gxdeFpsl = String.valueOf(fpslList.get(0).get("sl"));
-                if(StringUtils.isBlank(gxdeFpsl)){
-                    gxdeFpsl = "0";
-                }
-                gxdeFpsl = String.valueOf(Integer.valueOf(gxdeFpsl) + Integer.valueOf(fpsl));
-                updateSccpgxde.setGx_fpsl(gxdeFpsl);
-            }
-            /** 查询工序废品数量**/
-            List<Map<String,Object>> cpslList = btoWebMapper.queryProcessAmount(ddbh,gxbh,"1");
-            if(cpslList != null && cpslList.size() > 0){
-                String gxdeCpsl = String.valueOf(cpslList.get(0).get("sl"));
-                if(StringUtils.isBlank(gxdeCpsl)){
-                    gxdeCpsl = "0";
-                }
-                gxdeCpsl = String.valueOf(Integer.valueOf(gxdeCpsl) + Integer.valueOf(cpsl));
-                updateSccpgxde.setGx_cpsl(gxdeCpsl);
-            }
-
-            logger.info("scScgxde update ddbh {} gxbh {} scCpgxde {}",ddbh,gxbh,scCpgxde);
-            UpdateWrapper<ScCpgxde> sccpgxdeUpdateWrapper = new UpdateWrapper<>();
-            sccpgxdeUpdateWrapper.eq("DD_DDDH", ddbh);
-            sccpgxdeUpdateWrapper.eq("GX_BH", gxbh);
-            sccpgxdeUpdateWrapper.eq("CP_CPBH", cpbh);
-            scCpgxdeService.update(updateSccpgxde,sccpgxdeUpdateWrapper);
-
-            /** 查询工序交接数量**/
-            List<Map<String,Object>> jjslList = btoWebMapper.queryProcessHandoverAmount(ddbh,gxbh);
-            if(jjslList != null && jjslList.size() > 0){
-                String gxdeJjsl = String.valueOf(jjslList.get(0).get("sl"));
-                if(StringUtils.isBlank(gxdeJjsl)){
-                    gxdeJjsl = "0";
-                }
-                gxdeJjsl = String.valueOf(Integer.valueOf(zpsl) + Integer.valueOf(gxdeJjsl) + Integer.valueOf(cpsl));
-                List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndYl1(ddbh,cpbh,gxbh);
-                if(scCpgxdes != null && scCpgxdes.size() > 0){
-                    for(ScCpgxde jjScCpgxde:scCpgxdes){
-                        ScCpgxde updateScjjCpgxde = new ScCpgxde();
-                        updateScjjCpgxde.setGx_pcsl(jjScCpgxde.getGx_pcsl());
-                        updateScjjCpgxde.setGx_tjsl(jjScCpgxde.getGx_tjsl());
-                        updateScjjCpgxde.setGx_sygs(jjScCpgxde.getGx_sygs());
-                        updateScjjCpgxde.setGx_wclsl(jjScCpgxde.getGx_wclsl());
-                        updateScjjCpgxde.setGx_jjsl(jjScCpgxde.getGx_jjsl());
-                        updateScjjCpgxde.setGx_jjsl(gxdeJjsl);
-                        updateScjjCpgxde.setGx_wcsl(jjScCpgxde.getGx_wcsl());
-                        updateScjjCpgxde.setGx_cpsl(jjScCpgxde.getGx_cpsl());
-                        updateScjjCpgxde.setGx_fpsl(jjScCpgxde.getGx_fpsl());
-                        UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
-                        sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
-                        sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
-                        sccpgxdeJJslUpdateWrapper.eq("CP_CPBH",cpbh);
-                        scCpgxdeService.update(updateScjjCpgxde,sccpgxdeJJslUpdateWrapper);
-                    }
-                }
-
+            }else{
+                logger.error("ddbh {} gxbh {} error {}",ddbh,gxbh,"未找到该工序的工序定额信息！");
+                return ResultUtil.error(ResultCodeEnum.DATA_EXCEPTION,"未找到该工序的工序定额信息！");
             }
 
 
-            return ResultUtil.success(djbh);
+
         }catch (Exception e){
             logger.error("updateProductionRegistrationOrderInfo ddbh {} error {}",ddbh,e);
             return ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
@@ -797,11 +818,30 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                         result.put("fpsl","0");
                         result.put("cpsl","0");
                         result.put("djrq",sdf.format(new Date()));
+                        List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndGxbh(ddbh,null,gxbh);
+                        if(scCpgxdes != null && scCpgxdes.size() > 0){
+                            ScCpgxde scCpgxde = scCpgxdes.get(0);
+                            result.put("wcsl",scCpgxde.getGx_wcsl());
+                            result.put("pcsl",scCpgxde.getGx_pcsl());
+                        }else{
+                            result.put("wcsl","0");
+                            result.put("pcsl","0");
+                        }
                         resultList.add(result);
                     }
                 }
             }else{
-                resultList.add(jobProcessList.get(0));
+                Map<String,Object> jobProcess = jobProcessList.get(0);
+                List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndGxbh(ddbh,null,gxbh);
+                if(scCpgxdes != null && scCpgxdes.size() > 0){
+                    ScCpgxde scCpgxde = scCpgxdes.get(0);
+                    jobProcess.put("wcsl",scCpgxde.getGx_wcsl());
+                    jobProcess.put("pcsl",scCpgxde.getGx_pcsl());
+                }else{
+                    jobProcess.put("wcsl","0");
+                    jobProcess.put("pcsl","0");
+                }
+                resultList.add(jobProcess);
             }
         }catch (Exception e){
             logger.error("queryJobProcessList error {}",e);

@@ -9,6 +9,7 @@ import com.supercode.bto.web.pojos.restful.RestResult;
 import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
 import com.supercode.bto.web.service.IScScjlbService;
 import com.supercode.bto.web.utils.restful.ResultUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,18 +46,30 @@ public class ScScjlbServiceImpl extends ServiceImpl<ScScjlbMapper, ScScjlb> impl
     @Override
     public List<ScScjlb> selectByDjbhAndGxbh(String djbh, String gxbh) {
         QueryWrapper<ScScjlb> wrapper = new QueryWrapper<ScScjlb>();
-        wrapper.eq("DJ_BH",djbh);
-        wrapper.eq("GX_BH",gxbh);
+        if(StringUtils.isNotBlank(djbh)){
+            wrapper.eq("DJ_BH",djbh);
+        }
+        if(StringUtils.isNotBlank(gxbh)){
+            wrapper.eq("GX_BH",gxbh);
+        }
         wrapper.eq("MX_TJBZ","0");
         return scScjlbMapper.selectList(wrapper);
     }
 
     @Override
     public List<ScScjlb> selectByDjbhAndYybh(String djbh, String fclb, String yybh) {
+
         QueryWrapper<ScScjlb> wrapper = new QueryWrapper<ScScjlb>();
-        wrapper.eq("DJ_BH",djbh);
-        wrapper.eq("MX_FCLB",fclb);
-        wrapper.eq("MX_YY",yybh);
+        if(StringUtils.isNotBlank(djbh)){
+            wrapper.eq("DJ_BH",djbh);
+        }
+        if(StringUtils.isNotBlank(fclb)){
+            wrapper.eq("MX_FCLB",fclb);
+        }
+        if(StringUtils.isNotBlank(yybh)){
+            wrapper.eq("MX_YY",yybh);
+        }
+
         return scScjlbMapper.selectList(wrapper);
     }
 }

@@ -4,7 +4,6 @@ package com.supercode.bto.web.controller;
 
 
 import com.supercode.bto.web.entity.RzRyxxb;
-import com.supercode.bto.web.interceptor.UserLoginToken;
 import com.supercode.bto.web.pojos.restful.RestResult;
 import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
 import com.supercode.bto.web.service.IBaiduAipService;

@@ -43,7 +43,7 @@
                 AND scddb.ht_bh LIKE  '%' + #{htbh} + '%'
             </if>
             <if test="ddbh != null and ddbh != ''">
-                AND scddb.dd_dddh = #{ddbh}
+                AND scddb.dd_dddh  LIKE  '%' + #{ddbh} + '%'
             </if>
             <if test="cpmc != null and cpmc != ''">
                 AND cp.cp_mc LIKE  '%' + #{cpmc} + '%'
