@@ -566,12 +566,15 @@ public class BtoWebSereviceImpl implements IBtoWebService {
             List<ScScjlb> scScjlbList = scScjlbService.selectByDjbhAndGxbh(djbh,gxbh);
             if(scScjlbList != null && scScjlbList.size() > 0){
                 for(ScScjlb scScjlb : scScjlbList){
-                    ScScjlb updateScjlb = new ScScjlb();
-                    updateScjlb.setMx_sl(scScjlb.getMx_sl());
-                    updateScjlb.setMx_tjbz("1");
-                    UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
-                    scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
-                    scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
+                    String tjbz = scScjlb.getMx_tjbz();
+                    if(StringUtils.isNotBlank(tjbz) && !StringUtils.equals(tjbz,"1")){
+                        ScScjlb updateScjlb = new ScScjlb();
+                        updateScjlb.setMx_sl(scScjlb.getMx_sl());
+                        updateScjlb.setMx_tjbz("1");
+                        UpdateWrapper<ScScjlb> scscjlbpdateWrapper = new UpdateWrapper<>();
+                        scscjlbpdateWrapper.eq("DJ_JLBH",scScjlb.getDj_jlbh());
+                        scScjlbService.update(updateScjlb,scscjlbpdateWrapper);
+                    }
                 }
 
             }
@@ -633,12 +636,21 @@ public class BtoWebSereviceImpl implements IBtoWebService {
                 List<ScCpgxde> scCpgxdes = scCpgxdeService.selectByDdbhAndYl1(ddbh,cpbh,gxbh);
                 if(scCpgxdes != null && scCpgxdes.size() > 0){
                     for(ScCpgxde jjScCpgxde:scCpgxdes){
-                        jjScCpgxde.setGx_jjsl(gxdeJjsl);
+                        ScCpgxde updateScjjCpgxde = new ScCpgxde();
+                        updateScjjCpgxde.setGx_pcsl(jjScCpgxde.getGx_pcsl());
+                        updateScjjCpgxde.setGx_tjsl(jjScCpgxde.getGx_tjsl());
+                        updateScjjCpgxde.setGx_sygs(jjScCpgxde.getGx_sygs());
+                        updateScjjCpgxde.setGx_wclsl(jjScCpgxde.getGx_wclsl());
+                        updateScjjCpgxde.setGx_jjsl(jjScCpgxde.getGx_jjsl());
+                        updateScjjCpgxde.setGx_jjsl(gxdeJjsl);
+                        updateScjjCpgxde.setGx_wcsl(jjScCpgxde.getGx_wcsl());
+                        updateScjjCpgxde.setGx_cpsl(jjScCpgxde.getGx_cpsl());
+                        updateScjjCpgxde.setGx_fpsl(jjScCpgxde.getGx_fpsl());
                         UpdateWrapper<ScCpgxde> sccpgxdeJJslUpdateWrapper = new UpdateWrapper<>();
                         sccpgxdeJJslUpdateWrapper.eq("DD_DDDH", ddbh);
                         sccpgxdeJJslUpdateWrapper.eq("YL1", gxbh);
                         sccpgxdeJJslUpdateWrapper.eq("CP_CPBH",cpbh);
-                        scCpgxdeService.update(jjScCpgxde,sccpgxdeJJslUpdateWrapper);
+                        scCpgxdeService.update(updateScjjCpgxde,sccpgxdeJJslUpdateWrapper);
                     }
                 }
 
