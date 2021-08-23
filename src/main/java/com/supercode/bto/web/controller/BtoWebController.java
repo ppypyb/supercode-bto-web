@@ -691,9 +691,9 @@ public class BtoWebController {
         try {
             logger.info("cancelProductionRegistration djbh  {} ddbh {} gxbh {} ",djbh,ddbh,gxbh);
 
-//            return btoWebService.cancelProductionRegistration(djbh,ddbh,gxbh);
+            return btoWebService.cancelProductionRegistration(djbh,ddbh,gxbh);
 
-            return ResultUtil.success("取消登记成功");
+//            return ResultUtil.success("取消登记成功");
         } catch (Exception e) {
             logger.error("queryScrapReasonList {}",e);
             return   ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
