@@ -1,15 +1,16 @@
 package com.supercode.bto.web.service.impl;
 
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baidu.aip.ocr.AipOcr;
+import com.baidu.aip.util.Base64Util;
 import com.supercode.bto.web.common.SystemConstants;
-import com.supercode.bto.web.controller.BtoWebController;
 import com.supercode.bto.web.service.IBaiduAipService;
 
 
+import com.supercode.bto.web.utils.HttpUtil;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * @author pengyongbo
@@ -70,12 +73,20 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
         // 参数为本地图片二进制数组
         try {
 
-            byte[] fileBytes = file.getBytes();
-            JSONObject numberJsobj = aipOcrClient.basicGeneral(fileBytes, options);
+            byte[] imgData = file.getBytes();
+            String imgStr = Base64Util.encode(imgData);
+            String imgParam = URLEncoder.encode(imgStr, "UTF-8");
+
+            String param = "image=" + imgParam;
+            // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
+            String accessToken = getAuth();
+            String generalBasicResult = HttpUtil.post(SystemConstants.generalBasicUrl, accessToken, param);
+//            JSONObject numberJsobj = aipOcrClient.basicGeneral(fileBytes, options);
+            JSONObject numberJsobj = JSONObject.parseObject(generalBasicResult);
             logger.info("百度 numberJsobj {}",numberJsobj);
             if(numberJsobj.keySet().contains("words_result")){
                 JSONArray jsonArray = numberJsobj.getJSONArray("words_result");
-                List<Object> numberList = jsonArray.toList();
+                List<Object> numberList = jsonArray.toJavaList(Object.class);
                 if(numberList != null && numberList.size() > 0){
                     for(Object json:numberList){
                         if(json instanceof Map){
@@ -95,6 +106,8 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if(StringUtils.isBlank(jsonData)){
             jsonData = "0";
@@ -112,7 +125,7 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
      */
     public static String getAuth(String ak, String sk) {
         // 获取token地址
-        String getAccessTokenUrl = SystemConstants.authHostHost
+        String getAccessTokenUrl = SystemConstants.authHostUrl
                 // 1. grant_type为固定参数
                 + "grant_type=client_credentials"
                 // 2. 官网获取的 API Key
@@ -142,7 +155,7 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
              * 返回结果示例
              */
             System.err.println("result:" + result);
-            JSONObject jsonObject = new JSONObject(result);
+            JSONObject jsonObject = JSONObject.parseObject(result);
             String access_token = jsonObject.getString("access_token");
             return access_token;
         } catch (Exception e) {

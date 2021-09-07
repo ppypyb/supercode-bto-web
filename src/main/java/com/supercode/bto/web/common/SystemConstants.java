@@ -26,10 +26,15 @@ public class SystemConstants {
     public static final String SECRET_KEY  = "W7Nd40gwjFcHcq21RmjZ67oqQ4FnZnpB";
 
     /** 百度获取token URL**/
-    public static final String authHostHost = "https://aip.baidubce.com/oauth/2.0/token?";
+    public static final String authHostUrl = "https://aip.baidubce.com/oauth/2.0/token?";
 
     /** 数字识别 URL**/
-    public static final String numbersHost = "https://aip.baidubce.com/rest/2.0/ocr/v1/numbers";
+    public static final String numbersUrl = "https://aip.baidubce.com/rest/2.0/ocr/v1/numbers";
+
+    /** 通用文字识别URL**/
+    public static final String generalBasicUrl = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic";
+
+
 
     /** 服务器地址**/
     public static String serviceInternetIp;

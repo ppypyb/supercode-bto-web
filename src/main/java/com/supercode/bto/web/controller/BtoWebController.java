@@ -306,14 +306,14 @@ public class BtoWebController {
             @ApiImplicitParam(name = "rybh" , value = "人员编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "gxbh" , value = "岗位工序编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "gzdh" , value = "跟踪单号" , paramType = "query" , required = true,  dataType = "String"),
-            @ApiImplicitParam(name = "jjdh" , value = "交接单号" , paramType = "query" , required = true,  dataType = "String")
+            @ApiImplicitParam(name = "jjdh" , value = "交接单号" , paramType = "query" , required = false,  dataType = "String")
     })
     @RequestMapping(value = "queryJobProcessList",method = RequestMethod.GET)
     public RestResult queryJobProcessList(@RequestParam(name = "ddbh") String ddbh,
                                                       @RequestParam(name = "rybh") String rybh,
                                                       @RequestParam(name = "gxbh") String gxbh,
                                                       @RequestParam(name = "gzdh") String gzdh,
-                                                      @RequestParam(name = "jjdh") String jjdh
+                                                      @RequestParam(name = "jjdh",required = false,defaultValue = "") String jjdh
                                                       ){
         try {
             logger.info("queryJobProcessList ddbh {} rybh {} gxbh {} gzdh {} jjdh {}",ddbh,rybh,gxbh,gzdh,jjdh);
@@ -640,10 +640,10 @@ public class BtoWebController {
                                                             @RequestParam(name = "bmbh") String bmbh,
                                                             @RequestParam(name = "gxbh") String gxbh,
                                                             @RequestParam(name = "gzdh") String gzdh,
-                                                            @RequestParam(name = "jjdh") String jjdh,
-                                                            @RequestParam(name = "zpsl") String zpsl,
-                                                            @RequestParam(name = "fpsl") String fpsl,
-                                                            @RequestParam(name = "cpsl") String cpsl){
+                                                            @RequestParam(name = "jjdh",required = false,defaultValue = "") String jjdh,
+                                                            @RequestParam(name = "zpsl",required = false,defaultValue = "") String zpsl,
+                                                            @RequestParam(name = "fpsl",required = false,defaultValue = "") String fpsl,
+                                                            @RequestParam(name = "cpsl",required = false,defaultValue = "") String cpsl){
         try {
             logger.info("updateProductionRegistrationOrderInfo djbh {} ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
             return btoWebService.updateProductionRegistrationOrderInfo(djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);

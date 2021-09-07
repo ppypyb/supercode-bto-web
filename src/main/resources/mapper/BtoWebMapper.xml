@@ -386,10 +386,7 @@
     </select>
 
     <select id="queryProcessAmount" parameterType="java.lang.String" resultType="java.util.Map">
-        SELECT SUM( scjl.mx_sl ) sl,
-        scjl.dd_dddh as ddbh,
-        scjl.gx_bh as gxbh,
-        scjl.mx_fclb as fclb
+        SELECT SUM( scjl.mx_sl ) sl
         FROM
             sc_scjlb scjl
         WHERE
@@ -403,7 +400,6 @@
         <if test="fclb != null and fclb != ''">
             AND scjl.mx_fclb  = #{fclb}
         </if>
-        group by scjl.dd_dddh,scjl.gx_bh,scjl.mx_fclb
     </select>
     <select id="queryProcessHandoverAmount" parameterType="java.lang.String" resultType="java.util.Map" >
         SELECT SUM( jlb.mx_sl ) sl,
