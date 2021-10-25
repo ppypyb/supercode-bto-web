@@ -3,6 +3,7 @@ package com.supercode.bto.web.controller;
 
 
 
+import com.supercode.bto.web.common.SystemConstants;
 import com.supercode.bto.web.entity.RzRyxxb;
 import com.supercode.bto.web.pojos.restful.RestResult;
 import com.supercode.bto.web.pojos.restful.ResultCodeEnum;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -590,17 +592,19 @@ public class BtoWebController {
             @ApiResponse(code = 50001, message = "内部接口调用异常")})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ddbh" , value = "订单编号" , paramType = "query" , required = true,  dataType = "String"),
+            @ApiImplicitParam(name = "bmbh" , value = "部门编号" , paramType = "query" , required = true,  dataType = "String"),
             @ApiImplicitParam(name = "rybh" , value = "人员编号" , paramType = "query" , required = true,  dataType = "String")
     })
     @RequestMapping(value = "queryProductionRegistrationOrderInfo",method = RequestMethod.GET)
     public RestResult queryProductionRegistrationOrderInfo(@RequestParam(name = "ddbh") String ddbh,
+                                                           @RequestParam(name = "bmbh") String bmbh,
                                                            @RequestParam(name = "rybh") String rybh){
         try {
-            logger.info("queryProductionRegistrationOrderInfo ddbh  {} rybh {} ",ddbh,rybh);
+            logger.info("queryProductionRegistrationOrderInfo ddbh  {} bmbh {}  rybh {} ",ddbh,bmbh,rybh);
             Map<String,Object> result = new HashMap<String,Object>();
             Map<String,Object> orderInfo = btoWebService.queryProductionRegistrationOrderInfo(ddbh,rybh);
             result.putAll(orderInfo);
-            List<Map<String,Object>> jobProcessList = btoWebService.queryPersonnelJobProcessList(rybh);
+            List<Map<String,Object>> jobProcessList = btoWebService.queryRegisterJobProcessList(ddbh,bmbh,rybh);
             result.put("gwgx",jobProcessList);
 
             if(result == null || result.size() ==0){
@@ -641,12 +645,12 @@ public class BtoWebController {
                                                             @RequestParam(name = "gxbh") String gxbh,
                                                             @RequestParam(name = "gzdh") String gzdh,
                                                             @RequestParam(name = "jjdh",required = false,defaultValue = "") String jjdh,
-                                                            @RequestParam(name = "zpsl",required = false,defaultValue = "") String zpsl,
+                                                            @RequestParam(name = "wcsl",required = false,defaultValue = "") String wcsl,
                                                             @RequestParam(name = "fpsl",required = false,defaultValue = "") String fpsl,
                                                             @RequestParam(name = "cpsl",required = false,defaultValue = "") String cpsl){
         try {
-            logger.info("updateProductionRegistrationOrderInfo djbh {} ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
-            return btoWebService.updateProductionRegistrationOrderInfo(djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,zpsl,fpsl,cpsl);
+            logger.info("updateProductionRegistrationOrderInfo djbh {} ddbh  {} cpbh {} rybh {} bmbh {} gxbh {} gzdh {} jjdh {} zpsl {} fpsl {} cpsl {} ",djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,wcsl,fpsl,cpsl);
+            return btoWebService.updateProductionRegistrationOrderInfo(djbh,ddbh,cpbh,rybh,bmbh,gxbh,gzdh,jjdh,wcsl,fpsl,cpsl);
 
         } catch (Exception e) {
             logger.error("queryScrapReasonList {}",e);
@@ -700,8 +704,53 @@ public class BtoWebController {
         }
     }
 
+    @ApiOperation(value = "验证跟踪单号",notes = "验证跟踪单号")
+    @ApiResponses({@ApiResponse(code = 10000, message = "查询成功"),
+            @ApiResponse(code = 30001, message = "查询的资源不存在"),
+            @ApiResponse(code = 40001, message = "参数为空"),
+            @ApiResponse(code = 50001, message = "内部接口调用异常")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ddbh" , value = "订单编号" , paramType = "query" , required = true,  dataType = "String"),
+            @ApiImplicitParam(name = "gzdh" , value = "跟踪单号" , paramType = "query" , required = true,  dataType = "String"),
+            @ApiImplicitParam(name = "gxbh" , value = "岗位工序编号" , paramType = "query" , required = true,  dataType = "String")
+    })
+    @RequestMapping(value = "verifyGzdh" ,method = RequestMethod.GET)
+    public RestResult verifyGzdh(@RequestParam(name = "ddbh") String ddbh,
+                                                   @RequestParam(name = "gzdh") String gzdh,
+                                                   @RequestParam(name = "gxbh") String gxbh){
+        try {
+            logger.info("verifyGzdh  ddbh {} gzdh {} gxbh {} ",ddbh,gzdh,gxbh);
+
+            return btoWebService.verifyGzdh(ddbh,gzdh,gxbh);
+
+        } catch (Exception e) {
+            logger.error("verifyGzdh {}",e);
+            return   ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
+        }
+    }
+    @ApiOperation(value = "获取工序字典信息",notes = "获取工序字典信息")
+    @ApiResponses({@ApiResponse(code = 10000, message = "查询成功"),
+            @ApiResponse(code = 30001, message = "查询的资源不存在"),
+            @ApiResponse(code = 40001, message = "参数为空"),
+            @ApiResponse(code = 50001, message = "内部接口调用异常")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "gxbh" , value = "岗位工序编号" , paramType = "query" , required = true,  dataType = "String")
+    })
+    @RequestMapping(value = "getGxzdInfo" ,method = RequestMethod.GET)
+    public RestResult getGxzdInfo(@RequestParam(name = "gxbh") String gxbh){
+        try {
+            logger.info("getGxzdInfo  gxbh {} ",gxbh);
+
+            return btoWebService.getGxzdInfo(gxbh);
+
+        } catch (Exception e) {
+            logger.error("verifyGzdh {}",e);
+            return   ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
+        }
+    }
+
     /**
-     * 按段落解析一个word文档
+     * 百度识别数字
      * @param file
      * @return
      * @throws Exception
@@ -716,7 +765,53 @@ public class BtoWebController {
         Map<String,String> picNumbers = new HashMap<String,String>();
         try {
             logger.info("接收到文件开始识别：{}",System.currentTimeMillis());
+            String fileName = file.getOriginalFilename();
+            String imgPath = SystemConstants.phoneImgPath;
+            String path  = imgPath + File.separator+"upload"+File.separator;
+            //获取后缀
+            String substring = fileName.substring(fileName.lastIndexOf("."));
+            //保存的文件名
+            String dFileName = UUID.randomUUID()+substring;
+
             String numbers = baiduAipService.nubmers(file);
+            picNumbers.put("numbers",numbers);
+            logger.info("识别结束：{} {} ",System.currentTimeMillis(),picNumbers);
+            //将上传文件保存到路径
+            if(StringUtils.isNotBlank(path)){
+                File uploadFile = new File(path+dFileName);
+                File fileParent = uploadFile.getParentFile();
+                if(!fileParent.exists()){
+                    fileParent.mkdirs();
+                }
+                file.transferTo(uploadFile);
+            }
+            return ResultUtil.success(picNumbers);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResultUtil.error(ResultCodeEnum.INSIDE_API_INVOKE_ERROR);
+    }
+
+    /**
+     * 百度识别数字
+     * @param imgStr 图片base64
+     * @return
+     * @throws Exception
+     */
+    @ApiOperation(value = "百度OCR测试",notes = "百度OCR测试")
+    @ApiResponses({@ApiResponse(code = 10000, message = "查询成功"),
+            @ApiResponse(code = 30001, message = "查询的资源不存在"),
+            @ApiResponse(code = 40001, message = "参数为空"),
+            @ApiResponse(code = 50001, message = "内部接口调用异常")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "imgStr" , value = "图片Base64串" , paramType = "query" , required = true,  dataType = "String")
+    })
+    @RequestMapping(value = "ocrNumbersByImgBase64", method = RequestMethod.POST)
+    public RestResult ocrNumbersByImgBase64(@RequestParam(name="imgStr") String imgStr){
+        Map<String,String> picNumbers = new HashMap<String,String>();
+        try {
+            logger.info("接收到文件开始识别：{}",System.currentTimeMillis());
+            String numbers = baiduAipService.nubmers(imgStr);
             picNumbers.put("numbers",numbers);
             logger.info("识别结束：{} {} ",System.currentTimeMillis(),picNumbers);
             return ResultUtil.success(picNumbers);

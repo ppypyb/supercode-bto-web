@@ -115,6 +115,56 @@ public class BaiduAipServiceImpl implements IBaiduAipService   {
         return jsonData;
     }
 
+    @Override
+    public String nubmers(String imgStr) {
+        // 传入可选参数调用接口
+        HashMap<String, String> options = new HashMap<String, String>();
+        options.put("language_type", "CHN_ENG");
+        options.put("detect_direction", "true");
+        options.put("detect_language", "true");
+        options.put("probability", "true");
+        String jsonData = "";
+        // 参数为本地图片二进制数组
+        try {
+            String imgParam = URLEncoder.encode(imgStr, "UTF-8");
+            String param = "image=" + imgParam;
+            // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
+            String accessToken = getAuth();
+            String generalBasicResult = HttpUtil.post(SystemConstants.generalBasicUrl, accessToken, param);
+//            JSONObject numberJsobj = aipOcrClient.basicGeneral(fileBytes, options);
+            JSONObject numberJsobj = JSONObject.parseObject(generalBasicResult);
+            logger.info("百度 numberJsobj {}",numberJsobj);
+            if(numberJsobj.keySet().contains("words_result")){
+                JSONArray jsonArray = numberJsobj.getJSONArray("words_result");
+                List<Object> numberList = jsonArray.toJavaList(Object.class);
+                if(numberList != null && numberList.size() > 0){
+                    for(Object json:numberList){
+                        if(json instanceof Map){
+                            if(((Map<String, String>) json).containsKey("words")){
+                                Map<String,String> jsonMap = (Map<String, String>) json;
+                                String words = jsonMap.get("words");
+                                if(!isContainChinese(words)){
+                                    if(!StringUtils.contains(words,"NO")){
+                                        jsonData = jsonData + words;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(StringUtils.isBlank(jsonData)){
+            jsonData = "0";
+        }
+        return jsonData;
+    }
+
     /**
      * 获取API访问token
      * 该token有一定的有效期，需要自行管理，当失效时需重新获取.

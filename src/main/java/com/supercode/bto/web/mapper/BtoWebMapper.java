@@ -116,6 +116,8 @@ public interface BtoWebMapper {
      */
     List<Map<String,Object>> queryPersonnelJobProcessList(@Param("rybh") String rybh);
 
+    List<Map<String,Object>> queryRegisterJobProcessList(@Param("ddbh") String ddbh,@Param("bmbh") String bmbh,@Param("rybh") String rybh);
+
     /**
      * @description: 查询订单的跟踪单号信息
      * @author pengyongbo

@@ -17,5 +17,9 @@ public interface IBaiduAipService {
 
     public String nubmers(MultipartFile file);
 
+    /** 识别图片中数字**/
+
+    public String nubmers(String imgStr);
+
 
 }

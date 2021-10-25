@@ -27,4 +27,15 @@ public interface IScJldjbService extends IService<ScJldjb> {
      */
     List<ScJldjb> queryScjlbList(String ddbh,String rybh,String gxbh,String gzdh,String jjdh);
 
+    /**
+     * 查询其他跟踪单号的登记记录
+     * @param ddbh
+     * @param rybh
+     * @param gxbh
+     * @param gzdh
+     * @param jjdh
+     * @return
+     */
+    List<ScJldjb> queryOtherGzdhScjldjbList(String ddbh,String rybh,String gxbh,String gzdh,String jjdh);
+
 }

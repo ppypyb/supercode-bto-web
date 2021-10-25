@@ -95,6 +95,15 @@ public interface IBtoWebService {
     List<Map<String,Object>> queryPersonnelJobProcessList(String rybh);
 
     /**
+     * 查询生产登记中工序信息
+     * @param ddbh
+     * @param bmbh
+     * @param rybh
+     * @return
+     */
+    List<Map<String,Object>> queryRegisterJobProcessList(String ddbh,String bmbh,String rybh);
+
+    /**
      * @description: 根据订单编号和产品编号查询订单跟踪单号
      * @author pengyongbo
      * @param: [ddbh, cpbh]
@@ -155,7 +164,7 @@ public interface IBtoWebService {
      * @date: 2021/7/25 15:25
      * @return:
      */
-    RestResult updateProductionRegistrationOrderInfo(String djbh,String ddbh,String cpbh,String rybh,String bmbh,String gxbh,String gzdh,String jjdh,String zpsl,String fpsl,String cpsl);
+    RestResult updateProductionRegistrationOrderInfo(String djbh,String ddbh,String cpbh,String rybh,String bmbh,String gxbh,String gzdh,String jjdh,String wcsl,String fpsl,String cpsl);
 
     /**
      * @description: 废次品登记
@@ -174,6 +183,22 @@ public interface IBtoWebService {
      * @return:
      */
     RestResult cancelProductionRegistration(String djbh,String ddbh,String gxbh);
+
+    /**
+     * 验证跟踪单号并返回完成数量、废品数量、次品数量
+     * @param ddbh
+     * @param gzdh
+     * @param gxbh
+     * @return
+     */
+    RestResult verifyGzdh(String ddbh,String gzdh,String gxbh);
+
+    /**
+     * 获取工序字典信息
+     * @param gxbh
+     * @return
+     */
+    RestResult getGxzdInfo(String gxbh);
 
     /**
      * @description: 查询岗位工序

@@ -44,6 +44,10 @@ public class SystemConstants {
     public static String serviceContextPath;
 
 
+    /** 手机上传图片保存地址**/
+    public static String phoneImgPath;
+
+
     @Value("${service.Internet.ip}")
     public  void setServiceInternetIp(String serviceInternetIp) {
         SystemConstants.serviceInternetIp = serviceInternetIp;
@@ -58,6 +62,8 @@ public class SystemConstants {
         SystemConstants.serviceContextPath = serviceContextPath;
     }
 
-
-
+    @Value("${phoneImgPath}")
+    public void setPhoneImgPath(String phoneImgPath) {
+        SystemConstants.phoneImgPath = phoneImgPath;
+    }
 }

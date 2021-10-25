@@ -66,4 +66,26 @@ public class ScJldjbServiceImpl extends ServiceImpl<ScJldjbMapper, ScJldjb> impl
 
         return scJldjbMapper.selectList(wrapper);
     }
+
+    @Override
+    public List<ScJldjb> queryOtherGzdhScjldjbList(String ddbh, String rybh, String gxbh, String gzdh, String jjdh) {
+        QueryWrapper<ScJldjb> wrapper = new QueryWrapper<ScJldjb>();
+        if(StringUtils.isNotBlank(ddbh)){
+            wrapper.eq("DD_DDDH",ddbh);
+        }
+        if(StringUtils.isNotBlank(rybh)){
+            wrapper.eq("RY_BH",rybh);
+        }
+        if(StringUtils.isNotBlank(gxbh)){
+            wrapper.eq("GX_BH",gxbh);
+        }
+        if(StringUtils.isNotBlank(gzdh)){
+            wrapper.ne("DJ_GZDH",gzdh);
+        }
+        if(StringUtils.isNotBlank(jjdh)){
+            wrapper.eq("DJ_CH",jjdh);
+        }
+
+        return scJldjbMapper.selectList(wrapper);
+    }
 }
